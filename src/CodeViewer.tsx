@@ -29,7 +29,13 @@ import DOMPurify from "dompurify";
 import { EditorFind } from "./EditorFind";
 import { t as translate } from "./i18n";
 import { setHandle, clearHandle, markActive } from "./registry";
-import { formatterForExt, languageForExt, onExtChange } from "./ext";
+import {
+  cmExtensionList,
+  formatterForExt,
+  languageForExt,
+  onExtChange,
+} from "./ext";
+import type { Extension } from "@codemirror/state";
 import type { FileViewerContext, PluginApi } from "./host";
 
 type StrategyKind = "text" | "markdown" | "svg";
@@ -180,13 +186,15 @@ export function CodeViewer({
   useEffect(() => onExtChange(() => setExtVer((n) => n + 1)), []);
 
   const cmExtensions = useMemo(() => {
-    const exts = [search()];
+    const exts: Extension[] = [search()];
     if (!isLarge) {
       const ext = languageExtensionFor(path);
       if (ext) exts.push(ext);
+      // 확장 플러그인이 등록한 전역 CM 확장(TODO 강조 등) — 큰 파일 보호 기준은 언어와 동일.
+      exts.push(...(cmExtensionList() as Extension[]));
     }
     return exts;
-    // extVer: 언어 매핑 등록/해제 신호(값 자체는 미사용).
+    // extVer: 언어/확장 등록/해제 신호(값 자체는 미사용).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, isLarge, extVer]);
 
