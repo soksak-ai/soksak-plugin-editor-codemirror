@@ -30362,8 +30362,8 @@ var parseWorker = /* @__PURE__ */ ViewPlugin.fromClass(class ParseWorker {
   } }
 });
 var language = /* @__PURE__ */ Facet.define({
-  combine(languages) {
-    return languages.length ? languages[0] : null;
+  combine(languages2) {
+    return languages2.length ? languages2[0] : null;
   },
   enables: (language2) => [
     Language.state,
@@ -45022,15 +45022,15 @@ var extended = /* @__PURE__ */ commonmark.configure([GFM, Subscript, Superscript
   ]
 }]);
 var markdownLanguage = /* @__PURE__ */ mkLang(extended);
-function getCodeParser(languages, defaultLanguage) {
+function getCodeParser(languages2, defaultLanguage) {
   return (info) => {
-    if (info && languages) {
+    if (info && languages2) {
       let found = null;
       info = /\S*/.exec(info)[0];
-      if (typeof languages == "function")
-        found = languages(info);
+      if (typeof languages2 == "function")
+        found = languages2(info);
       else
-        found = LanguageDescription.matchLanguageName(languages, info, true);
+        found = LanguageDescription.matchLanguageName(languages2, info, true);
       if (found instanceof LanguageDescription)
         return found.support ? found.support.language.parser : ParseContext.getSkippingParser(found.load());
       else if (found)
@@ -76486,6 +76486,58 @@ function activeViewId() {
   return active;
 }
 
+// src/ext.ts
+var formatters = /* @__PURE__ */ new Map();
+var languages = /* @__PURE__ */ new Map();
+function formatterForExt(ext) {
+  for (const f of formatters.values()) {
+    if (f.extensions.includes(ext)) return f;
+  }
+  return null;
+}
+function languageForExt(ext) {
+  return languages.get(ext) ?? null;
+}
+var version = 0;
+var watchers = /* @__PURE__ */ new Set();
+function onExtChange(cb) {
+  watchers.add(cb);
+  return () => watchers.delete(cb);
+}
+function bump() {
+  version++;
+  for (const w2 of watchers) w2();
+}
+function installEditorExtHost(app) {
+  const offReg = app.bus.on("editor.ext.register", (payload) => {
+    const p = payload;
+    if (!p) return;
+    if (p.kind === "formatter" && typeof p.format === "function") {
+      formatters.set(p.id, { id: p.id, extensions: p.extensions, format: p.format });
+      bump();
+    } else if (p.kind === "language") {
+      languages.set(p.ext, p.lang);
+      bump();
+    }
+  });
+  const offUnreg = app.bus.on("editor.ext.unregister", (payload) => {
+    const p = payload;
+    if (!p) return;
+    if (p.kind === "formatter" && p.id) {
+      formatters.delete(p.id);
+      bump();
+    } else if (p.kind === "language" && p.ext) {
+      languages.delete(p.ext);
+      bump();
+    }
+  });
+  app.bus.emit("editor.ext.ready", {});
+  return () => {
+    offReg.dispose();
+    offUnreg.dispose();
+  };
+}
+
 // src/CodeViewer.tsx
 var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
 function fmtBytes(n) {
@@ -76510,7 +76562,7 @@ var VALID_LANGS = new Set(langNames);
 var LANG_ALIAS = { zsh: "bash" };
 function languageExtensionFor(path) {
   const e = extOf(path);
-  const key = LANG_ALIAS[e] ?? e;
+  const key = languageForExt(e) ?? LANG_ALIAS[e] ?? e;
   return VALID_LANGS.has(key) ? loadLanguage(key) : null;
 }
 function detectDark() {
@@ -76599,6 +76651,8 @@ function CodeViewer({
     () => strat === "svg" && text5 != null ? `data:image/svg+xml;utf8,${encodeURIComponent(text5)}` : null,
     [strat, text5]
   );
+  const [extVer, setExtVer] = (0, import_react4.useState)(0);
+  (0, import_react4.useEffect)(() => onExtChange(() => setExtVer((n) => n + 1)), []);
   const cmExtensions = (0, import_react4.useMemo)(() => {
     const exts = [search()];
     if (!isLarge) {
@@ -76606,7 +76660,7 @@ function CodeViewer({
       if (ext) exts.push(ext);
     }
     return exts;
-  }, [path, isLarge]);
+  }, [path, isLarge, extVer]);
   const markdownHtml = (0, import_react4.useMemo)(() => {
     if (strat !== "markdown" || text5 == null) return "";
     const raw3 = g.parse(text5, { async: false });
@@ -76666,7 +76720,25 @@ function CodeViewer({
         setFindOpen(true);
         setFindFocus((n) => n + 1);
       },
-      format: async () => ({ formatted: false, reason: "no formatter" }),
+      format: async () => {
+        const v2 = cmViewRef.current;
+        if (!v2 || !editableRef.current) {
+          return { formatted: false, reason: "read-only" };
+        }
+        const ext = extOf(path);
+        const fmt = formatterForExt(ext);
+        if (!fmt) return { formatted: false, reason: `no formatter: ${ext}` };
+        const cur2 = textRef.current ?? "";
+        const out = await fmt.format(cur2, { path, ext });
+        if (typeof out !== "string") {
+          return { formatted: false, reason: "formatter returned non-string" };
+        }
+        if (out === cur2) return { formatted: true };
+        v2.dispatch({
+          changes: { from: 0, to: v2.state.doc.length, insert: out }
+        });
+        return { formatted: true };
+      },
       find: (query, opts) => {
         const v2 = cmViewRef.current;
         if (!v2) return { matches: 0 };
@@ -77077,6 +77149,7 @@ var plugin_entry_default = {
   activate(ctx) {
     const app = ctx.app;
     ensureStyle();
+    ctx.subscriptions.push({ dispose: installEditorExtHost(app) });
     if (app.ui?.registerFileViewer) {
       ctx.subscriptions.push(
         app.ui.registerFileViewer("code", {
