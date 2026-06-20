@@ -1,6 +1,6 @@
-# soksak-plugin-editor
+# soksak-plugin-editor-codemirror
 
-soksak 파일 에디터. 코드·텍스트·마크다운·SVG 파일을 CodeMirror 6 에디터로 표시하며 구문 강조,
+soksak 파일 에디터(CodeMirror 엔진). 코드·텍스트·마크다운·SVG 파일을 CodeMirror 6 에디터로 표시하며 구문 강조,
 찾기/바꾸기, 저장을 제공합니다.
 
 soksak **파일 뷰어**(`contributes.fileViewers`)로 등록됩니다. 코어는 열린 파일을 폴백(`"*"`)으로

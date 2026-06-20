@@ -29,8 +29,8 @@ const opts = {
 if (process.argv.includes("--watch")) {
   const ctx = await context(opts);
   await ctx.watch();
-  console.log("[editor] watching src → main.js …");
+  console.log("[editor-codemirror] watching src → main.js …");
 } else {
   await build(opts);
-  console.log("[editor] built main.js");
+  console.log("[editor-codemirror] built main.js");
 }
