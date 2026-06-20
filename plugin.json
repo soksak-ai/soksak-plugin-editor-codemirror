@@ -1,12 +1,12 @@
 {
   "spec": "soksak-spec-plugin@0.0.1",
-  "id": "soksak-plugin-editor",
+  "id": "soksak-plugin-editor-codemirror",
   "name": {
-    "ko": "에디터",
-    "en": "Editor"
+    "ko": "에디터 (CodeMirror)",
+    "en": "Editor (CodeMirror)"
   },
   "version": "0.0.1",
-  "repo": "https://github.com/soksak-ai/soksak-plugin-editor.git",
+  "repo": "https://github.com/soksak-ai/soksak-plugin-editor-codemirror.git",
   "description": {
     "ko": "코드·텍스트·마크다운·SVG 파일 에디터(CodeMirror). 찾기/바꾸기·저장·구문 강조. soksak 파일 뷰어로 등록(엔진 중립 — 코어는 매칭만).",
     "en": "Code, text, markdown, and SVG file editor (CodeMirror). Find/replace, save, syntax highlighting. Registers as a soksak file viewer (engine-neutral — the core only routes)."
