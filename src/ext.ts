@@ -39,10 +39,16 @@ interface RegisteredFormatter {
   format: FormatFn;
 }
 
-// 확장 레지스트리(에디터 플러그인 내부 단일 저장소). 함수 핸들을 들고 있으므로 bus 페이로드가 아니라
-// 직접 호출 API(아래 createEditorExtApi)로 채운다 — 확장 플러그인은 app.bus 로 그 API 를 호출한다.
+// 확장 레지스트리(에디터 플러그인 내부 단일 저장소). 함수/객체 핸들을 들고 있으므로 — soksak 은 단일
+// webview(같은 JS 힙)라 app.bus 페이로드로 함수·CM Extension 객체를 그대로 실어 보낼 수 있다.
 const formatters = new Map<string, RegisteredFormatter>();
 const languages = new Map<string, string>(); // ext → lang
+// CM Extension 객체(전역 — languages 미지정이면 모든 파일). id → extension(불투명 — CodeViewer 가 펼침).
+const cmExtensions = new Map<string, unknown>();
+
+export function cmExtensionList(): unknown[] {
+  return [...cmExtensions.values()];
+}
 
 export function formatterForExt(ext: string): RegisteredFormatter | null {
   for (const f of formatters.values()) {
@@ -74,11 +80,18 @@ export function extVersion(): number {
 // 확장 플러그인은 app.bus.emit("editor.ext.register", {...}) 가 아니라, 함수를 실어야 하므로
 // app.bus 의 페이로드로 "등록 요청 핸들"을 전달한다(아래 EditorExtApi 형태). 구현 단순화를 위해
 // 확장 플러그인은 app.bus.emit 으로 등록 객체를 그대로 보낸다(같은 JS 힙 — soksak 단일 webview).
+// CM 확장 플러그인이 ctx.app.editor.modules 없이도 호스트 CM 모듈을 받도록, ready 공지 페이로드에
+// 모듈 묶음을 싣는다(자체 번들 금지 — 에디터가 엔진을 소유). 확장 플러그인은 이 modules 로 확장을 만든다.
+import * as cmView from "@codemirror/view";
+import * as cmState from "@codemirror/state";
+import * as cmLanguage from "@codemirror/language";
+
 export function installEditorExtHost(app: PluginApi): () => void {
   const offReg = app.bus.on("editor.ext.register", (payload) => {
     const p = payload as
       | { kind: "formatter"; id: string; extensions: string[]; format: FormatFn }
       | { kind: "language"; ext: string; lang: string }
+      | { kind: "cmext"; id: string; extension: unknown }
       | undefined;
     if (!p) return;
     if (p.kind === "formatter" && typeof p.format === "function") {
@@ -86,6 +99,9 @@ export function installEditorExtHost(app: PluginApi): () => void {
       bump();
     } else if (p.kind === "language") {
       languages.set(p.ext, p.lang);
+      bump();
+    } else if (p.kind === "cmext") {
+      cmExtensions.set(p.id, p.extension);
       bump();
     }
   });
@@ -98,12 +114,25 @@ export function installEditorExtHost(app: PluginApi): () => void {
     } else if (p.kind === "language" && p.ext) {
       languages.delete(p.ext);
       bump();
+    } else if (p.kind === "cmext" && p.id) {
+      cmExtensions.delete(p.id);
+      bump();
     }
   });
-  // 늦게 켜진 확장 플러그인이 재등록하도록 ready 공지(에디터가 먼저 떴을 때 대비).
-  app.bus.emit("editor.ext.ready", {});
+  const readyPayload = {
+    modules: { view: cmView, state: cmState, language: cmLanguage },
+  };
+  // 핸드셰이크: 확장 플러그인이 자기 activate 에서 "editor.ext.hello" 를 emit 하면 ready 로 응답한다.
+  // dependencies 로 에디터가 *먼저* activate 되므로(전이 종속 먼저), 확장 플러그인은 ready 를 놓친다 —
+  // hello→ready 로 순서를 뒤집어 유실 0. 에디터가 늦게 켜진 경우엔 아래 1회 ready 가 커버.
+  const offHello = app.bus.on("editor.ext.hello", () => {
+    app.bus.emit("editor.ext.ready", readyPayload);
+  });
+  // 에디터가 확장보다 늦게 켜진 경우 대비 1회 공지(확장이 이미 hello 를 보냈더라도 멱등 재등록).
+  app.bus.emit("editor.ext.ready", readyPayload);
   return () => {
     offReg.dispose();
     offUnreg.dispose();
+    offHello.dispose();
   };
 }
