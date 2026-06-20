@@ -29,6 +29,7 @@ import DOMPurify from "dompurify";
 import { EditorFind } from "./EditorFind";
 import { t as translate } from "./i18n";
 import { setHandle, clearHandle, markActive } from "./registry";
+import { formatterForExt, languageForExt, onExtChange } from "./ext";
 import type { FileViewerContext, PluginApi } from "./host";
 
 type StrategyKind = "text" | "markdown" | "svg";
@@ -59,7 +60,8 @@ const LANG_ALIAS: Record<string, string> = { zsh: "bash" };
 
 function languageExtensionFor(path: string) {
   const e = extOf(path);
-  const key = LANG_ALIAS[e] ?? e;
+  // 확장 플러그인의 언어 매핑(ext→CM 키)이 내장 별칭보다 우선(코어 languageFor 선례).
+  const key = languageForExt(e) ?? LANG_ALIAS[e] ?? e;
   return VALID_LANGS.has(key) ? loadLanguage(key as LanguageName) : null;
 }
 
@@ -173,6 +175,10 @@ export function CodeViewer({
     [strat, text],
   );
 
+  // 확장 레지스트리(언어/포매터) 변경 신호 — 늦게 켜진 언어 플러그인이 열린 에디터에 반영되도록.
+  const [extVer, setExtVer] = useState(0);
+  useEffect(() => onExtChange(() => setExtVer((n) => n + 1)), []);
+
   const cmExtensions = useMemo(() => {
     const exts = [search()];
     if (!isLarge) {
@@ -180,7 +186,9 @@ export function CodeViewer({
       if (ext) exts.push(ext);
     }
     return exts;
-  }, [path, isLarge]);
+    // extVer: 언어 매핑 등록/해제 신호(값 자체는 미사용).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [path, isLarge, extVer]);
 
   const markdownHtml = useMemo(() => {
     if (strat !== "markdown" || text == null) return "";
@@ -250,7 +258,25 @@ export function CodeViewer({
         setFindOpen(true);
         setFindFocus((n) => n + 1);
       },
-      format: async () => ({ formatted: false, reason: "no formatter" }),
+      format: async () => {
+        const v = cmViewRef.current;
+        if (!v || !editableRef.current) {
+          return { formatted: false, reason: "read-only" };
+        }
+        const ext = extOf(path);
+        const fmt = formatterForExt(ext);
+        if (!fmt) return { formatted: false, reason: `no formatter: ${ext}` };
+        const cur = textRef.current ?? "";
+        const out = await fmt.format(cur, { path, ext });
+        if (typeof out !== "string") {
+          return { formatted: false, reason: "formatter returned non-string" };
+        }
+        if (out === cur) return { formatted: true };
+        v.dispatch({
+          changes: { from: 0, to: v.state.doc.length, insert: out },
+        });
+        return { formatted: true };
+      },
       find: (query, opts) => {
         const v = cmViewRef.current;
         if (!v) return { matches: 0 };
