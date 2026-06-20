@@ -7,6 +7,10 @@ var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
+var __export = (target, all) => {
+  for (var name2 in all)
+    __defProp(target, name2, { get: all[name2], enumerable: true });
+};
 var __copyProps = (to, from2, except, desc) => {
   if (from2 && typeof from2 === "object" || typeof from2 === "function") {
     for (let key of __getOwnPropNames(from2))
@@ -12784,6 +12788,40 @@ var import_react2 = __toESM(require_react(), 1);
 // node_modules/@uiw/react-codemirror/esm/useCodeMirror.js
 var import_react = __toESM(require_react(), 1);
 
+// node_modules/@codemirror/state/dist/index.js
+var dist_exports = {};
+__export(dist_exports, {
+  Annotation: () => Annotation,
+  AnnotationType: () => AnnotationType,
+  ChangeDesc: () => ChangeDesc,
+  ChangeSet: () => ChangeSet,
+  CharCategory: () => CharCategory,
+  Compartment: () => Compartment,
+  EditorSelection: () => EditorSelection,
+  EditorState: () => EditorState,
+  Facet: () => Facet,
+  Line: () => Line,
+  MapMode: () => MapMode,
+  Prec: () => Prec,
+  Range: () => Range,
+  RangeSet: () => RangeSet,
+  RangeSetBuilder: () => RangeSetBuilder,
+  RangeValue: () => RangeValue,
+  SelectionRange: () => SelectionRange,
+  StateEffect: () => StateEffect,
+  StateEffectType: () => StateEffectType,
+  StateField: () => StateField,
+  Text: () => Text,
+  Transaction: () => Transaction,
+  codePointAt: () => codePointAt2,
+  codePointSize: () => codePointSize2,
+  combineConfig: () => combineConfig,
+  countColumn: () => countColumn,
+  findClusterBreak: () => findClusterBreak2,
+  findColumn: () => findColumn,
+  fromCodePoint: () => fromCodePoint
+});
+
 // node_modules/@marijn/find-cluster-break/src/index.js
 var rangeFrom = [];
 var rangeTo = [];
@@ -16211,6 +16249,62 @@ function findColumn(string3, col, tabSize, strict) {
   return strict === true ? -1 : string3.length;
 }
 
+// node_modules/@codemirror/view/dist/index.js
+var dist_exports2 = {};
+__export(dist_exports2, {
+  BidiSpan: () => BidiSpan,
+  BlockInfo: () => BlockInfo,
+  BlockType: () => BlockType,
+  BlockWrapper: () => BlockWrapper,
+  Decoration: () => Decoration,
+  Direction: () => Direction,
+  EditorView: () => EditorView,
+  GutterMarker: () => GutterMarker,
+  MatchDecorator: () => MatchDecorator,
+  RectangleMarker: () => RectangleMarker,
+  ViewPlugin: () => ViewPlugin,
+  ViewUpdate: () => ViewUpdate,
+  WidgetType: () => WidgetType,
+  __test: () => __test,
+  activateHover: () => activateHover,
+  closeHoverTooltip: () => closeHoverTooltip,
+  closeHoverTooltips: () => closeHoverTooltips,
+  crosshairCursor: () => crosshairCursor,
+  drawSelection: () => drawSelection,
+  dropCursor: () => dropCursor,
+  getDialog: () => getDialog,
+  getDrawSelectionConfig: () => getDrawSelectionConfig,
+  getPanel: () => getPanel,
+  getTooltip: () => getTooltip,
+  gutter: () => gutter,
+  gutterLineClass: () => gutterLineClass,
+  gutterWidgetClass: () => gutterWidgetClass,
+  gutters: () => gutters,
+  hasHoverTooltips: () => hasHoverTooltips,
+  highlightActiveLine: () => highlightActiveLine,
+  highlightActiveLineGutter: () => highlightActiveLineGutter,
+  highlightSpecialChars: () => highlightSpecialChars,
+  highlightTrailingWhitespace: () => highlightTrailingWhitespace,
+  highlightWhitespace: () => highlightWhitespace,
+  hoverTooltip: () => hoverTooltip,
+  keymap: () => keymap,
+  layer: () => layer,
+  lineNumberMarkers: () => lineNumberMarkers,
+  lineNumberWidgetMarker: () => lineNumberWidgetMarker,
+  lineNumbers: () => lineNumbers,
+  logException: () => logException,
+  panels: () => panels,
+  placeholder: () => placeholder,
+  rectangularSelection: () => rectangularSelection,
+  repositionTooltips: () => repositionTooltips,
+  runScopeHandlers: () => runScopeHandlers,
+  scrollPastEnd: () => scrollPastEnd,
+  showDialog: () => showDialog,
+  showPanel: () => showPanel,
+  showTooltip: () => showTooltip,
+  tooltips: () => tooltips
+});
+
 // node_modules/style-mod/src/style-mod.js
 var C = "\u037C";
 var COUNT = typeof Symbol == "undefined" ? "__" + C : Symbol.for(C);
@@ -17656,15 +17750,15 @@ var ViewPlugin = class _ViewPlugin {
   */
   static define(create2, spec) {
     const { eventHandlers, eventObservers, provide, decorations: deco } = spec || {};
-    return new _ViewPlugin(nextPluginID++, create2, eventHandlers, eventObservers, (plugin) => {
+    return new _ViewPlugin(nextPluginID++, create2, eventHandlers, eventObservers, (plugin2) => {
       let ext = [];
       if (deco)
         ext.push(decorations.of((view) => {
-          let pluginInst = view.plugin(plugin);
+          let pluginInst = view.plugin(plugin2);
           return pluginInst ? deco(pluginInst) : Decoration.none;
         }));
       if (provide)
-        ext.push(provide(plugin));
+        ext.push(provide(plugin2));
       return ext;
     });
   }
@@ -20692,10 +20786,10 @@ var InputState = class {
       this.mouseSelection.destroy();
   }
 };
-function bindHandler(plugin, handler) {
+function bindHandler(plugin2, handler) {
   return (view, event) => {
     try {
-      return handler.call(plugin, event, view);
+      return handler.call(plugin2, event, view);
     } catch (e) {
       logException(view.state, e);
     }
@@ -20706,19 +20800,19 @@ function computeHandlers(plugins) {
   function record(type5) {
     return result[type5] || (result[type5] = { observers: [], handlers: [] });
   }
-  for (let plugin of plugins) {
-    let spec = plugin.spec, handlers2 = spec && spec.plugin.domEventHandlers, observers2 = spec && spec.plugin.domEventObservers;
+  for (let plugin2 of plugins) {
+    let spec = plugin2.spec, handlers2 = spec && spec.plugin.domEventHandlers, observers2 = spec && spec.plugin.domEventObservers;
     if (handlers2)
       for (let type5 in handlers2) {
         let f = handlers2[type5];
         if (f)
-          record(type5).handlers.push(bindHandler(plugin.value, f));
+          record(type5).handlers.push(bindHandler(plugin2.value, f));
       }
     if (observers2)
       for (let type5 in observers2) {
         let f = observers2[type5];
         if (f)
-          record(type5).observers.push(bindHandler(plugin.value, f));
+          record(type5).observers.push(bindHandler(plugin2.value, f));
       }
   }
   for (let type5 in handlers)
@@ -23711,8 +23805,8 @@ var EditorView = class _EditorView {
     if (config2.scrollTo && config2.scrollTo.is(scrollIntoView))
       this.viewState.scrollTarget = config2.scrollTo.value.clip(this.viewState.state);
     this.plugins = this.state.facet(viewPlugin).map((spec) => new PluginInstance(spec));
-    for (let plugin of this.plugins)
-      plugin.update(this);
+    for (let plugin2 of this.plugins)
+      plugin2.update(this);
     this.observer = new DOMObserver(this);
     this.inputState = new InputState(this);
     this.inputState.ensureHandlers(this.plugins);
@@ -23847,13 +23941,13 @@ var EditorView = class _EditorView {
     this.updateState = 2;
     let hadFocus = this.hasFocus;
     try {
-      for (let plugin of this.plugins)
-        plugin.destroy(this);
+      for (let plugin2 of this.plugins)
+        plugin2.destroy(this);
       this.viewState = new ViewState(this, newState);
       this.plugins = newState.facet(viewPlugin).map((spec) => new PluginInstance(spec));
       this.pluginMap.clear();
-      for (let plugin of this.plugins)
-        plugin.update(this);
+      for (let plugin2 of this.plugins)
+        plugin2.update(this);
       this.docView.destroy();
       this.docView = new DocView(this);
       this.inputState.ensureHandlers(this.plugins);
@@ -23876,14 +23970,14 @@ var EditorView = class _EditorView {
         if (found < 0) {
           newPlugins.push(new PluginInstance(spec));
         } else {
-          let plugin = this.plugins[found];
-          plugin.mustUpdate = update;
-          newPlugins.push(plugin);
+          let plugin2 = this.plugins[found];
+          plugin2.mustUpdate = update;
+          newPlugins.push(plugin2);
         }
       }
-      for (let plugin of this.plugins)
-        if (plugin.mustUpdate != update)
-          plugin.destroy(this);
+      for (let plugin2 of this.plugins)
+        if (plugin2.mustUpdate != update)
+          plugin2.destroy(this);
       this.plugins = newPlugins;
       this.pluginMap.clear();
     } else {
@@ -23896,8 +23990,8 @@ var EditorView = class _EditorView {
       this.inputState.ensureHandlers(this.plugins);
   }
   docViewUpdate() {
-    for (let plugin of this.plugins) {
-      let val = plugin.value;
+    for (let plugin2 of this.plugins) {
+      let val = plugin2.value;
       if (val && val.docViewUpdate) {
         try {
           val.docViewUpdate(this);
@@ -24106,10 +24200,10 @@ var EditorView = class _EditorView {
   know you registered a given plugin, it is recommended to check
   the return value of this method.
   */
-  plugin(plugin) {
-    let known = this.pluginMap.get(plugin);
-    if (known === void 0 || known && known.plugin != plugin)
-      this.pluginMap.set(plugin, known = this.plugins.find((p) => p.plugin == plugin) || null);
+  plugin(plugin2) {
+    let known = this.pluginMap.get(plugin2);
+    if (known === void 0 || known && known.plugin != plugin2)
+      this.pluginMap.set(plugin2, known = this.plugins.find((p) => p.plugin == plugin2) || null);
     return known && known.update(this).value;
   }
   /**
@@ -24412,8 +24506,8 @@ var EditorView = class _EditorView {
   destroy() {
     if (this.root.activeElement == this.contentDOM)
       this.contentDOM.blur();
-    for (let plugin of this.plugins)
-      plugin.destroy(this);
+    for (let plugin2 of this.plugins)
+      plugin2.destroy(this);
     this.plugins = [];
     this.inputState.destroy();
     this.docView.destroy();
@@ -25053,6 +25147,9 @@ function drawSelection(config2 = {}) {
     nativeSelectionHidden.of(true)
   ];
 }
+function getDrawSelectionConfig(state) {
+  return state.facet(selectionConfig);
+}
 function configChanged(update) {
   return update.startState.facet(selectionConfig) != update.state.facet(selectionConfig);
 }
@@ -25473,6 +25570,26 @@ var TabWidget = class extends WidgetType {
     return false;
   }
 };
+var plugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
+  constructor() {
+    this.height = 1e3;
+    this.attrs = { style: "padding-bottom: 1000px" };
+  }
+  update(update) {
+    let { view } = update;
+    let height = view.viewState.editorHeight - view.defaultLineHeight - view.documentPadding.top - 0.5;
+    if (height >= 0 && height != this.height) {
+      this.height = height;
+      this.attrs = { style: `padding-bottom: ${height}px` };
+    }
+  }
+});
+function scrollPastEnd() {
+  return [plugin, contentAttributes.of((view) => {
+    var _a2;
+    return ((_a2 = view.plugin(plugin)) === null || _a2 === void 0 ? void 0 : _a2.attrs) || null;
+  })];
+}
 function highlightActiveLine() {
   return activeLineHighlighter;
 }
@@ -25528,7 +25645,7 @@ var Placeholder = class extends WidgetType {
   }
 };
 function placeholder(content3) {
-  let plugin = ViewPlugin.fromClass(class {
+  let plugin2 = ViewPlugin.fromClass(class {
     constructor(view) {
       this.view = view;
       this.placeholder = content3 ? Decoration.set([Decoration.widget({ widget: new Placeholder(content3), side: 1 }).range(0)]) : Decoration.none;
@@ -25538,9 +25655,9 @@ function placeholder(content3) {
     }
   }, { decorations: (v2) => v2.decorations });
   return typeof content3 == "string" ? [
-    plugin,
+    plugin2,
     EditorView.contentAttributes.of({ "aria-placeholder": content3 })
-  ] : plugin;
+  ] : plugin2;
 }
 var MaxOff = 2e3;
 function rectangleFor(state, a2, b2) {
@@ -25618,7 +25735,7 @@ var keys = {
 var showCrosshair = { style: "cursor: crosshair" };
 function crosshairCursor(options = {}) {
   let [code2, getter] = keys[options.key || "Alt"];
-  let plugin = ViewPlugin.fromClass(class {
+  let plugin2 = ViewPlugin.fromClass(class {
     constructor(view) {
       this.view = view;
       this.isDown = false;
@@ -25644,10 +25761,10 @@ function crosshairCursor(options = {}) {
     }
   });
   return [
-    plugin,
+    plugin2,
     EditorView.contentAttributes.of((view) => {
       var _a2;
-      return ((_a2 = view.plugin(plugin)) === null || _a2 === void 0 ? void 0 : _a2.isDown) ? showCrosshair : null;
+      return ((_a2 = view.plugin(plugin2)) === null || _a2 === void 0 ? void 0 : _a2.isDown) ? showCrosshair : null;
     })
   ];
 }
@@ -25665,7 +25782,7 @@ var TooltipViewManager = class {
   update(update, above) {
     var _a2;
     let input = update.state.facet(this.facet);
-    let tooltips = input.filter((x2) => x2);
+    let tooltips2 = input.filter((x2) => x2);
     if (input === this.input) {
       for (let t3 of this.tooltipViews)
         if (t3.update)
@@ -25673,8 +25790,8 @@ var TooltipViewManager = class {
       return false;
     }
     let tooltipViews = [], newAbove = above ? [] : null;
-    for (let i = 0; i < tooltips.length; i++) {
-      let tip = tooltips[i], known = -1;
+    for (let i = 0; i < tooltips2.length; i++) {
+      let tip = tooltips2[i], known = -1;
       if (!tip)
         continue;
       for (let i2 = 0; i2 < this.tooltips.length; i2++) {
@@ -25704,11 +25821,14 @@ var TooltipViewManager = class {
       above.length = newAbove.length;
     }
     this.input = input;
-    this.tooltips = tooltips;
+    this.tooltips = tooltips2;
     this.tooltipViews = tooltipViews;
     return true;
   }
 };
+function tooltips(config2 = {}) {
+  return tooltipConfig.of(config2);
+}
 function windowSpace(view) {
   let docElt = view.dom.ownerDocument.documentElement;
   return { top: 0, left: 0, bottom: docElt.clientHeight, right: docElt.clientWidth };
@@ -26102,18 +26222,18 @@ var HoverTooltipHost = class _HoverTooltipHost {
   }
 };
 var showHoverTooltipHost = /* @__PURE__ */ showTooltip.compute([showHoverTooltip], (state) => {
-  let tooltips = state.facet(showHoverTooltip);
-  if (tooltips.length === 0)
+  let tooltips2 = state.facet(showHoverTooltip);
+  if (tooltips2.length === 0)
     return null;
   return {
-    pos: Math.min(...tooltips.map((t3) => t3.pos)),
-    end: Math.max(...tooltips.map((t3) => {
+    pos: Math.min(...tooltips2.map((t3) => t3.pos)),
+    end: Math.max(...tooltips2.map((t3) => {
       var _a2;
       return (_a2 = t3.end) !== null && _a2 !== void 0 ? _a2 : t3.pos;
     })),
     create: HoverTooltipHost.create,
-    above: tooltips[0].above,
-    arrow: tooltips.some((t3) => t3.arrow)
+    above: tooltips2[0].above,
+    arrow: tooltips2.some((t3) => t3.arrow)
   };
 });
 var hoverPlugin = /* @__PURE__ */ Facet.define();
@@ -26179,10 +26299,10 @@ var HoverPlugin = class {
     let open = this.source(view, pos, side);
     let done = (value) => {
       if (value && !(Array.isArray(value) && !value.length)) {
-        let tooltips = Array.isArray(value) ? value : [value];
+        let tooltips2 = Array.isArray(value) ? value : [value];
         if (locked)
-          this.locked.set(tooltips, locked);
-        view.dispatch({ effects: this.setHover.of(tooltips) });
+          this.locked.set(tooltips2, locked);
+        view.dispatch({ effects: this.setHover.of(tooltips2) });
       }
     };
     if (open && "then" in open) {
@@ -26198,9 +26318,9 @@ var HoverPlugin = class {
     }
   }
   get tooltip() {
-    let plugin = this.view.plugin(tooltipPlugin);
-    let index = plugin ? plugin.manager.tooltips.findIndex((t3) => t3.create == HoverTooltipHost.create) : -1;
-    return index > -1 ? plugin.manager.tooltipViews[index] : null;
+    let plugin2 = this.view.plugin(tooltipPlugin);
+    let index = plugin2 ? plugin2.manager.tooltips.findIndex((t3) => t3.create == HoverTooltipHost.create) : -1;
+    return index > -1 ? plugin2.manager.tooltipViews[index] : null;
   }
   mousemove(event) {
     var _a2, _b2;
@@ -26308,7 +26428,7 @@ function hoverTooltip(source, options = {}) {
     },
     provide: (f) => showHoverTooltip.from(f)
   });
-  const plugin = ViewPlugin.define((view) => new HoverPlugin(
+  const plugin2 = ViewPlugin.define((view) => new HoverPlugin(
     view,
     source,
     hoverState,
@@ -26321,8 +26441,8 @@ function hoverTooltip(source, options = {}) {
     active: hoverState,
     extension: [
       hoverState,
-      plugin,
-      hoverPlugin.of(plugin),
+      plugin2,
+      hoverPlugin.of(plugin2),
       showHoverTooltipHost
     ]
   };
@@ -26335,17 +26455,29 @@ function activateHover(view, pos, side, options = {}) {
     if (found)
       plugins = [found];
   }
-  for (let plugin of plugins)
-    plugin.activateHover(view, pos, side, (_a2 = options.until) !== null && _a2 !== void 0 ? _a2 : () => false);
+  for (let plugin2 of plugins)
+    plugin2.activateHover(view, pos, side, (_a2 = options.until) !== null && _a2 !== void 0 ? _a2 : () => false);
 }
 function getTooltip(view, tooltip) {
-  let plugin = view.plugin(tooltipPlugin);
-  if (!plugin)
+  let plugin2 = view.plugin(tooltipPlugin);
+  if (!plugin2)
     return null;
-  let found = plugin.manager.tooltips.indexOf(tooltip);
-  return found < 0 ? null : plugin.manager.tooltipViews[found];
+  let found = plugin2.manager.tooltips.indexOf(tooltip);
+  return found < 0 ? null : plugin2.manager.tooltipViews[found];
+}
+function hasHoverTooltips(state) {
+  return state.facet(showHoverTooltip).some((x2) => x2);
 }
 var closeHoverTooltipEffect = /* @__PURE__ */ StateEffect.define();
+var closeHoverTooltips = /* @__PURE__ */ closeHoverTooltipEffect.of(null);
+function closeHoverTooltip(tooltip) {
+  return closeHoverTooltipEffect.of(tooltip.active);
+}
+function repositionTooltips(view) {
+  let plugin2 = view.plugin(tooltipPlugin);
+  if (plugin2)
+    plugin2.maybeMeasure();
+}
 var panelConfig = /* @__PURE__ */ Facet.define({
   combine(configs) {
     let topContainer, bottomContainer;
@@ -26356,10 +26488,13 @@ var panelConfig = /* @__PURE__ */ Facet.define({
     return { topContainer, bottomContainer };
   }
 });
+function panels(config2) {
+  return config2 ? [panelConfig.of(config2)] : [];
+}
 function getPanel(view, panel) {
-  let plugin = view.plugin(panelPlugin);
-  let index = plugin ? plugin.specs.indexOf(panel) : -1;
-  return index > -1 ? plugin.panels[index] : null;
+  let plugin2 = view.plugin(panelPlugin);
+  let index = plugin2 ? plugin2.specs.indexOf(panel) : -1;
+  return index > -1 ? plugin2.panels[index] : null;
 }
 var panelPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
   constructor(view) {
@@ -26392,7 +26527,7 @@ var panelPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
     let input = update.state.facet(showPanel);
     if (input != this.input) {
       let specs = input.filter((x2) => x2);
-      let panels = [], top3 = [], bottom = [], mount = [];
+      let panels2 = [], top3 = [], bottom = [], mount = [];
       for (let spec of specs) {
         let known = this.specs.indexOf(spec), panel;
         if (known < 0) {
@@ -26403,11 +26538,11 @@ var panelPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
           if (panel.update)
             panel.update(update);
         }
-        panels.push(panel);
+        panels2.push(panel);
         (panel.top ? top3 : bottom).push(panel);
       }
       this.specs = specs;
-      this.panels = panels;
+      this.panels = panels2;
       this.top.sync(top3);
       this.bottom.sync(bottom);
       for (let p of mount) {
@@ -26426,8 +26561,8 @@ var panelPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
     this.bottom.sync([]);
   }
 }, {
-  provide: (plugin) => EditorView.scrollMargins.of((view) => {
-    let value = view.plugin(plugin);
+  provide: (plugin2) => EditorView.scrollMargins.of((view) => {
+    let value = view.plugin(plugin2);
     return value && { top: value.top.scrollMargin(), bottom: value.bottom.scrollMargin() };
   })
 });
@@ -26441,11 +26576,11 @@ var PanelGroup = class {
     this.panels = [];
     this.syncClasses();
   }
-  sync(panels) {
+  sync(panels2) {
     for (let p of this.panels)
-      if (p.destroy && panels.indexOf(p) < 0)
+      if (p.destroy && panels2.indexOf(p) < 0)
         p.destroy();
-    this.panels = panels;
+    this.panels = panels2;
     this.syncDOM();
   }
   syncDOM() {
@@ -26516,6 +26651,15 @@ function showDialog(view, config2) {
     });
     return form;
   }) };
+}
+function getDialog(view, className2) {
+  let dialogs = view.state.field(dialogField, false) || [];
+  for (let open of dialogs) {
+    let panel = getPanel(view, open);
+    if (panel && panel.dom.classList.contains(className2))
+      return panel;
+  }
+  return null;
 }
 var dialogField = /* @__PURE__ */ StateField.define({
   create() {
@@ -26794,8 +26938,8 @@ var gutterView = /* @__PURE__ */ ViewPlugin.fromClass(class {
       this.domAfter.remove();
   }
 }, {
-  provide: (plugin) => EditorView.scrollMargins.of((view) => {
-    let value = view.plugin(plugin);
+  provide: (plugin2) => EditorView.scrollMargins.of((view) => {
+    let value = view.plugin(plugin2);
     if (!value || value.gutters.length == 0 || !value.fixed)
       return null;
     let before = value.dom.offsetWidth * view.scaleX, after = value.domAfter ? value.domAfter.offsetWidth * view.scaleX : 0;
@@ -27075,6 +27219,103 @@ var activeLineGutterHighlighter = /* @__PURE__ */ gutterLineClass.compute(["sele
 function highlightActiveLineGutter() {
   return activeLineGutterHighlighter;
 }
+function matcher(decorator) {
+  return ViewPlugin.define((view) => ({
+    decorations: decorator.createDeco(view),
+    update(u2) {
+      this.decorations = decorator.updateDeco(u2, this.decorations);
+    }
+  }), {
+    decorations: (v2) => v2.decorations
+  });
+}
+var tabDeco = /* @__PURE__ */ Decoration.mark({ class: "cm-highlightTab" });
+var spaceDeco = /* @__PURE__ */ Decoration.mark({ class: "cm-highlightSpace" });
+var whitespaceHighlighter = /* @__PURE__ */ matcher(/* @__PURE__ */ new MatchDecorator({
+  regexp: /\t| /g,
+  decoration: (match2) => match2[0] == "	" ? tabDeco : spaceDeco,
+  boundary: /\S/
+}));
+function highlightWhitespace() {
+  return whitespaceHighlighter;
+}
+var trailingHighlighter = /* @__PURE__ */ matcher(/* @__PURE__ */ new MatchDecorator({
+  regexp: /\s+$/g,
+  decoration: /* @__PURE__ */ Decoration.mark({ class: "cm-trailingSpace" })
+}));
+function highlightTrailingWhitespace() {
+  return trailingHighlighter;
+}
+var __test = {
+  HeightMap,
+  HeightOracle,
+  MeasuredHeights,
+  QueryType,
+  ChangedRange,
+  computeOrder,
+  moveVisually,
+  clearHeightChangeFlag,
+  getHeightChangeFlag: () => heightChangeFlag
+};
+
+// node_modules/@codemirror/language/dist/index.js
+var dist_exports3 = {};
+__export(dist_exports3, {
+  DocInput: () => DocInput,
+  HighlightStyle: () => HighlightStyle,
+  IndentContext: () => IndentContext,
+  LRLanguage: () => LRLanguage,
+  Language: () => Language,
+  LanguageDescription: () => LanguageDescription,
+  LanguageSupport: () => LanguageSupport,
+  ParseContext: () => ParseContext,
+  StreamLanguage: () => StreamLanguage,
+  StringStream: () => StringStream,
+  TreeIndentContext: () => TreeIndentContext,
+  bidiIsolates: () => bidiIsolates,
+  bracketMatching: () => bracketMatching,
+  bracketMatchingHandle: () => bracketMatchingHandle,
+  codeFolding: () => codeFolding,
+  continuedIndent: () => continuedIndent,
+  defaultHighlightStyle: () => defaultHighlightStyle,
+  defineLanguageFacet: () => defineLanguageFacet,
+  delimitedIndent: () => delimitedIndent,
+  ensureSyntaxTree: () => ensureSyntaxTree,
+  flatIndent: () => flatIndent,
+  foldAll: () => foldAll,
+  foldCode: () => foldCode,
+  foldEffect: () => foldEffect,
+  foldGutter: () => foldGutter,
+  foldInside: () => foldInside,
+  foldKeymap: () => foldKeymap,
+  foldNodeProp: () => foldNodeProp,
+  foldService: () => foldService,
+  foldState: () => foldState,
+  foldable: () => foldable,
+  foldedRanges: () => foldedRanges,
+  forceParsing: () => forceParsing,
+  getIndentUnit: () => getIndentUnit,
+  getIndentation: () => getIndentation,
+  highlightingFor: () => highlightingFor,
+  indentNodeProp: () => indentNodeProp,
+  indentOnInput: () => indentOnInput,
+  indentRange: () => indentRange,
+  indentService: () => indentService,
+  indentString: () => indentString,
+  indentUnit: () => indentUnit,
+  language: () => language,
+  languageDataProp: () => languageDataProp,
+  matchBrackets: () => matchBrackets,
+  sublanguageProp: () => sublanguageProp,
+  syntaxHighlighting: () => syntaxHighlighting,
+  syntaxParserRunning: () => syntaxParserRunning,
+  syntaxTree: () => syntaxTree,
+  syntaxTreeAvailable: () => syntaxTreeAvailable,
+  toggleFold: () => toggleFold,
+  unfoldAll: () => unfoldAll,
+  unfoldCode: () => unfoldCode,
+  unfoldEffect: () => unfoldEffect
+});
 
 // node_modules/@lezer/common/dist/index.js
 var DefaultBufferLength = 1024;
@@ -29990,6 +30231,31 @@ function syntaxTree(state) {
   let field = state.field(Language.state, false);
   return field ? field.tree : Tree.empty;
 }
+function ensureSyntaxTree(state, upto, timeout = 50) {
+  var _a2;
+  let parse = (_a2 = state.field(Language.state, false)) === null || _a2 === void 0 ? void 0 : _a2.context;
+  if (!parse)
+    return null;
+  let oldVieport = parse.viewport;
+  parse.updateViewport({ from: 0, to: upto });
+  let result = parse.isDone(upto) || parse.work(timeout, upto) ? parse.tree : null;
+  parse.updateViewport(oldVieport);
+  return result;
+}
+function syntaxTreeAvailable(state, upto = state.doc.length) {
+  var _a2;
+  return ((_a2 = state.field(Language.state, false)) === null || _a2 === void 0 ? void 0 : _a2.context.isDone(upto)) || false;
+}
+function forceParsing(view, upto = view.viewport.to, timeout = 100) {
+  let success = ensureSyntaxTree(view.state, upto, timeout);
+  if (success != syntaxTree(view.state))
+    view.dispatch({});
+  return !!success;
+}
+function syntaxParserRunning(view) {
+  var _a2;
+  return ((_a2 = view.plugin(parseWorker)) === null || _a2 === void 0 ? void 0 : _a2.isWorking()) || false;
+}
 var DocInput = class {
   /**
   Create an input object for the given document.
@@ -30497,6 +30763,30 @@ function getIndentation(context, pos) {
   let tree = syntaxTree(context.state);
   return tree.length >= pos ? syntaxIndentation(context, tree, pos) : null;
 }
+function indentRange(state, from2, to) {
+  let updated = /* @__PURE__ */ Object.create(null);
+  let context = new IndentContext(state, { overrideIndentation: (start) => {
+    var _a2;
+    return (_a2 = updated[start]) !== null && _a2 !== void 0 ? _a2 : -1;
+  } });
+  let changes = [];
+  for (let pos = from2; pos <= to; ) {
+    let line = state.doc.lineAt(pos);
+    pos = line.to + 1;
+    let indent6 = getIndentation(context, line.from);
+    if (indent6 == null)
+      continue;
+    if (!/\S/.test(line.text))
+      indent6 = 0;
+    let cur2 = /^\s*/.exec(line.text)[0];
+    let norm = indentString(state, indent6);
+    if (cur2 != norm) {
+      updated[line.from] = indent6;
+      changes.push({ from: line.from, to: line.from + cur2.length, insert: norm });
+    }
+  }
+  return state.changes(changes);
+}
 var IndentContext = class {
   /**
   Create an indent context.
@@ -30864,6 +31154,9 @@ function clearTouchedFolds(folded, from2, to = from2) {
     filter: (a2, b2) => a2 >= to || b2 <= from2
   });
 }
+function foldedRanges(state) {
+  return state.field(foldState, false) || RangeSet.empty;
+}
 function findFold(state, from2, to) {
   var _a2;
   let found = null;
@@ -30933,6 +31226,32 @@ var unfoldAll = (view) => {
   });
   view.dispatch({ effects });
   return true;
+};
+function foldableContainer(view, lineBlock) {
+  for (let line = lineBlock; ; ) {
+    let foldableRegion = foldable(view.state, line.from, line.to);
+    if (foldableRegion && foldableRegion.to > lineBlock.from)
+      return foldableRegion;
+    if (!line.from)
+      return null;
+    line = view.lineBlockAt(line.from - 1);
+  }
+}
+var toggleFold = (view) => {
+  let effects = [];
+  for (let line of selectedLines(view)) {
+    let folded = findFold(view.state, line.from, line.to);
+    if (folded) {
+      effects.push(unfoldEffect.of(folded), announceFold(view, folded, false));
+    } else {
+      let foldRange = foldableContainer(view, line);
+      if (foldRange)
+        effects.push(foldEffect.of(foldRange), announceFold(view, foldRange));
+    }
+  }
+  if (effects.length > 0)
+    view.dispatch({ effects: maybeEnable(view.state, effects) });
+  return !!effects.length;
 };
 var foldKeymap = [
   { key: "Ctrl-Shift-[", mac: "Cmd-Alt-[", run: foldCode },
@@ -31154,6 +31473,19 @@ function syntaxHighlighting(highlighter, options) {
   else
     ext.push(highlighterFacet.of(highlighter));
   return ext;
+}
+function highlightingFor(state, tags3, scope) {
+  let highlighters = getHighlighters(state);
+  let result = null;
+  if (highlighters)
+    for (let highlighter of highlighters) {
+      if (!highlighter.scope || scope && highlighter.scope(scope)) {
+        let cls = highlighter.style(tags3);
+        if (cls)
+          result = result ? result + " " + cls : cls;
+      }
+    }
+  return result;
 }
 var TreeHighlighter = class {
   constructor(view) {
@@ -31957,6 +32289,108 @@ function docID(data2, lang) {
   ], top: true });
   typeArray.push(type5);
   return type5;
+}
+function buildForLine(line) {
+  return line.length <= 4096 && /[\u0590-\u05f4\u0600-\u06ff\u0700-\u08ac\ufb50-\ufdff]/.test(line);
+}
+function textHasRTL(text5) {
+  for (let i = text5.iter(); !i.next().done; )
+    if (buildForLine(i.value))
+      return true;
+  return false;
+}
+function changeAddsRTL(change) {
+  let added = false;
+  change.iterChanges((fA, tA, fB, tB, ins) => {
+    if (!added && textHasRTL(ins))
+      added = true;
+  });
+  return added;
+}
+var alwaysIsolate = /* @__PURE__ */ Facet.define({ combine: (values2) => values2.some((x2) => x2) });
+function bidiIsolates(options = {}) {
+  let extensions = [isolateMarks];
+  if (options.alwaysIsolate)
+    extensions.push(alwaysIsolate.of(true));
+  return extensions;
+}
+var isolateMarks = /* @__PURE__ */ ViewPlugin.fromClass(class {
+  constructor(view) {
+    this.always = view.state.facet(alwaysIsolate) || view.textDirection != Direction.LTR || view.state.facet(EditorView.perLineTextDirection);
+    this.hasRTL = !this.always && textHasRTL(view.state.doc);
+    this.tree = syntaxTree(view.state);
+    this.decorations = this.always || this.hasRTL ? buildDeco(view, this.tree, this.always) : Decoration.none;
+  }
+  update(update) {
+    let always = update.state.facet(alwaysIsolate) || update.view.textDirection != Direction.LTR || update.state.facet(EditorView.perLineTextDirection);
+    if (!always && !this.hasRTL && changeAddsRTL(update.changes))
+      this.hasRTL = true;
+    if (!always && !this.hasRTL)
+      return;
+    let tree = syntaxTree(update.state);
+    if (always != this.always || tree != this.tree || update.docChanged || update.viewportChanged) {
+      this.tree = tree;
+      this.always = always;
+      this.decorations = buildDeco(update.view, tree, always);
+    }
+  }
+}, {
+  provide: (plugin2) => {
+    function access(view) {
+      var _a2, _b2;
+      return (_b2 = (_a2 = view.plugin(plugin2)) === null || _a2 === void 0 ? void 0 : _a2.decorations) !== null && _b2 !== void 0 ? _b2 : Decoration.none;
+    }
+    return [
+      EditorView.outerDecorations.of(access),
+      Prec.lowest(EditorView.bidiIsolatedRanges.of(access))
+    ];
+  }
+});
+function buildDeco(view, tree, always) {
+  let deco = new RangeSetBuilder();
+  let ranges = view.visibleRanges;
+  if (!always)
+    ranges = clipRTLLines(ranges, view.state.doc);
+  for (let { from: from2, to } of ranges) {
+    tree.iterate({
+      enter: (node) => {
+        let iso = node.type.prop(NodeProp.isolate);
+        if (iso)
+          deco.add(node.from, node.to, marks[iso]);
+      },
+      from: from2,
+      to
+    });
+  }
+  return deco.finish();
+}
+function clipRTLLines(ranges, doc2) {
+  let cur2 = doc2.iter(), pos = 0, result = [], last = null;
+  for (let { from: from2, to } of ranges) {
+    if (last && last.to > from2) {
+      from2 = last.to;
+      if (from2 >= to)
+        continue;
+    }
+    if (pos + cur2.value.length < from2) {
+      cur2.next(from2 - (pos + cur2.value.length));
+      pos = from2;
+    }
+    for (; ; ) {
+      let start = pos, end2 = pos + cur2.value.length;
+      if (!cur2.lineBreak && buildForLine(cur2.value)) {
+        if (last && last.to > start - 10)
+          last.to = Math.min(to, end2);
+        else
+          result.push(last = { from: start, to: Math.min(to, end2) });
+      }
+      if (end2 >= to)
+        break;
+      pos = end2;
+      cur2.next();
+    }
+  }
+  return result;
 }
 var marks = {
   rtl: /* @__PURE__ */ Decoration.mark({ class: "cm-iso", inclusive: true, attributes: { dir: "rtl" }, bidiIsolate: Direction.RTL }),
@@ -34827,9 +35261,9 @@ function sortOptions(active2, state) {
         }
       } else {
         let pattern = state.sliceDoc(a2.from, a2.to), match2;
-        let matcher = conf.filterStrict ? new StrictMatcher(pattern) : new FuzzyMatcher(pattern);
+        let matcher2 = conf.filterStrict ? new StrictMatcher(pattern) : new FuzzyMatcher(pattern);
         for (let option of a2.result.options)
-          if (match2 = matcher.match(option.label)) {
+          if (match2 = matcher2.match(option.label)) {
             let matched = !option.displayLabel ? match2.matched : getMatch ? getMatch(option, match2.matched) : [];
             let score2 = match2.score + (option.boost || 0);
             addOption(new Option(option, a2.source, matched, score2));
@@ -76489,6 +76923,10 @@ function activeViewId() {
 // src/ext.ts
 var formatters = /* @__PURE__ */ new Map();
 var languages = /* @__PURE__ */ new Map();
+var cmExtensions = /* @__PURE__ */ new Map();
+function cmExtensionList() {
+  return [...cmExtensions.values()];
+}
 function formatterForExt(ext) {
   for (const f of formatters.values()) {
     if (f.extensions.includes(ext)) return f;
@@ -76518,6 +76956,9 @@ function installEditorExtHost(app) {
     } else if (p.kind === "language") {
       languages.set(p.ext, p.lang);
       bump();
+    } else if (p.kind === "cmext") {
+      cmExtensions.set(p.id, p.extension);
+      bump();
     }
   });
   const offUnreg = app.bus.on("editor.ext.unregister", (payload) => {
@@ -76529,12 +76970,22 @@ function installEditorExtHost(app) {
     } else if (p.kind === "language" && p.ext) {
       languages.delete(p.ext);
       bump();
+    } else if (p.kind === "cmext" && p.id) {
+      cmExtensions.delete(p.id);
+      bump();
     }
   });
-  app.bus.emit("editor.ext.ready", {});
+  const readyPayload = {
+    modules: { view: dist_exports2, state: dist_exports, language: dist_exports3 }
+  };
+  const offHello = app.bus.on("editor.ext.hello", () => {
+    app.bus.emit("editor.ext.ready", readyPayload);
+  });
+  app.bus.emit("editor.ext.ready", readyPayload);
   return () => {
     offReg.dispose();
     offUnreg.dispose();
+    offHello.dispose();
   };
 }
 
@@ -76653,11 +77104,12 @@ function CodeViewer({
   );
   const [extVer, setExtVer] = (0, import_react4.useState)(0);
   (0, import_react4.useEffect)(() => onExtChange(() => setExtVer((n) => n + 1)), []);
-  const cmExtensions = (0, import_react4.useMemo)(() => {
+  const cmExtensions2 = (0, import_react4.useMemo)(() => {
     const exts = [search()];
     if (!isLarge) {
       const ext = languageExtensionFor(path);
       if (ext) exts.push(ext);
+      exts.push(...cmExtensionList());
     }
     return exts;
   }, [path, isLarge, extVer]);
@@ -76843,7 +77295,7 @@ function CodeViewer({
               value: text5,
               height: "100%",
               theme: isDark ? "dark" : "light",
-              extensions: cmExtensions,
+              extensions: cmExtensions2,
               editable: editable2,
               onChange: editable2 ? onChange : void 0,
               onCreateEditor: (v2) => setCmView(v2),
