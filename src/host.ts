@@ -56,6 +56,11 @@ export interface PluginApi {
     ) => Promise<{ text: string; truncated: boolean; totalBytes: number }>;
     writeText?: (path: string, content: string) => Promise<void>;
   };
+  // 플러그인 간 pub/sub(코어 정의 이벤트와 별개, 권한 불요). 에디터 확장 프로토콜의 채널.
+  bus: {
+    emit: (topic: string, payload: unknown) => void;
+    on: (topic: string, fn: (payload: unknown) => void) => Disposable;
+  };
 }
 
 export interface PluginContext {

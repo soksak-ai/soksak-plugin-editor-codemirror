@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { CodeViewer } from "./CodeViewer";
 import { GLOBAL_CSS } from "./styles";
 import { registerCommands } from "./commands";
+import { installEditorExtHost } from "./ext";
 import type { FileViewerContext, PluginContext } from "./host";
 
 const STYLE_ID = "sk-editor-style";
@@ -32,6 +33,9 @@ export default {
   activate(ctx: PluginContext) {
     const app = ctx.app;
     ensureStyle();
+
+    // 에디터 확장 프로토콜 호스트(포매터·언어 플러그인이 app.bus 로 등록) — 코어 app.editor 대체.
+    ctx.subscriptions.push({ dispose: installEditorExtHost(app) });
 
     if (app.ui?.registerFileViewer) {
       ctx.subscriptions.push(
