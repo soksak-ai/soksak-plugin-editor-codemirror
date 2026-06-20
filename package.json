@@ -1,0 +1,32 @@
+{
+  "name": "soksak-plugin-editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "soksak editor plugin — CodeMirror file viewer (code/text/markdown/svg)",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@codemirror/search": "6.7.0",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.43.1",
+    "@uiw/codemirror-extensions-langs": "^4.25.10",
+    "@uiw/react-codemirror": "^4.25.10",
+    "dompurify": "^3.4.8",
+    "marked": "^18.0.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "esbuild": "^0.24.2",
+    "typescript": "~5.9.3",
+    "vitest": "^2.1.8"
+  }
+}

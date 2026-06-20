@@ -1,0 +1,28 @@
+{
+  "spec": "soksak-plugin-spec@1",
+  "id": "soksak-plugin-editor",
+  "name": {
+    "ko": "에디터",
+    "en": "Editor"
+  },
+  "version": "0.1.0",
+  "repo": "https://github.com/soksak-ai/soksak-plugin-editor.git",
+  "description": {
+    "ko": "코드·텍스트·마크다운·SVG 파일 에디터(CodeMirror). 찾기/바꾸기·저장·구문 강조. soksak 파일 뷰어로 등록(엔진 중립 — 코어는 매칭만).",
+    "en": "Code, text, markdown, and SVG file editor (CodeMirror). Find/replace, save, syntax highlighting. Registers as a soksak file viewer (engine-neutral — the core only routes)."
+  },
+  "entry": "main.js",
+  "permissions": ["ui", "fs:read", "fs:write", "commands"],
+  "contributes": {
+    "fileViewers": [
+      { "id": "code", "extensions": ["*"], "priority": 0 }
+    ],
+    "commands": [
+      { "name": "ping", "title": { "ko": "적재/버전 확인(E2E)", "en": "Ping (load/version check)" } },
+      { "name": "save", "title": { "ko": "파일 저장", "en": "Save File" } },
+      { "name": "find", "title": { "ko": "찾기", "en": "Find" } },
+      { "name": "replace", "title": { "ko": "바꾸기", "en": "Replace" } },
+      { "name": "format", "title": { "ko": "문서 서식", "en": "Format Document" } }
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+node_modules/
+.soksak.json
+*.log
+.DS_Store

@@ -1,0 +1,435 @@
+// 코드/텍스트/마크다운/SVG 뷰어 — 코어 FileViewer 포팅(미디어 제외: 이미지/PDF/영상/오디오는
+// files 플러그인 몫). CodeMirror 소유(엔진 — 계약 A13). 찾기/바꾸기·저장·구문 강조. dirty 는 ctx.setDirty 로
+// 코어 탭에 보고. editor.* 명령은 registry 핸들로 동작.
+import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import CodeMirror, { EditorView } from "@uiw/react-codemirror";
+import {
+  findNext,
+  replaceAll,
+  replaceNext,
+  search,
+  SearchQuery,
+  setSearchQuery,
+} from "@codemirror/search";
+import {
+  langNames,
+  loadLanguage,
+  type LanguageName,
+} from "@uiw/codemirror-extensions-langs";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
+import { EditorFind } from "./EditorFind";
+import { t as translate } from "./i18n";
+import { setHandle, clearHandle, markActive } from "./registry";
+import type { FileViewerContext, PluginApi } from "./host";
+
+type StrategyKind = "text" | "markdown" | "svg";
+
+function fmtBytes(n: number): string {
+  if (n >= 1e9) return `${(n / 1e9).toFixed(1)}GB`;
+  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}MB`;
+  if (n >= 1e3) return `${(n / 1e3).toFixed(0)}KB`;
+  return `${n}B`;
+}
+
+function extOf(path: string): string {
+  const name = path.split("/").pop() ?? path;
+  const dot = name.lastIndexOf(".");
+  if (dot <= 0) return "";
+  return name.slice(dot + 1).toLowerCase();
+}
+
+function strategyFor(path: string): StrategyKind {
+  const e = extOf(path);
+  if (e === "svg") return "svg";
+  if (e === "md" || e === "markdown") return "markdown";
+  return "text";
+}
+
+const VALID_LANGS = new Set<string>(langNames as string[]);
+const LANG_ALIAS: Record<string, string> = { zsh: "bash" };
+
+function languageExtensionFor(path: string) {
+  const e = extOf(path);
+  const key = LANG_ALIAS[e] ?? e;
+  return VALID_LANGS.has(key) ? loadLanguage(key as LanguageName) : null;
+}
+
+// 호스트 CSS 변수 --bg 의 명도로 다크/라이트 추정(초기값). 이후 theme.changed 로 갱신.
+function detectDark(): boolean {
+  try {
+    const bg = getComputedStyle(document.documentElement)
+      .getPropertyValue("--bg")
+      .trim();
+    const m = bg.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+    if (m) {
+      const lum = 0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3];
+      return lum < 128;
+    }
+    if (/^#([0-9a-f]{6})$/i.test(bg)) {
+      const r = parseInt(bg.slice(1, 3), 16);
+      const g = parseInt(bg.slice(3, 5), 16);
+      const b = parseInt(bg.slice(5, 7), 16);
+      return 0.299 * r + 0.587 * g + 0.114 * b < 128;
+    }
+  } catch {
+    /* 무시 — 기본 다크 */
+  }
+  return true;
+}
+
+export function CodeViewer({
+  app,
+  ctx,
+}: {
+  app: PluginApi;
+  ctx: FileViewerContext;
+}) {
+  const { path, viewId } = ctx;
+  const [lang, setLang] = useState(() => app.locale());
+  const [isDark, setIsDark] = useState(detectDark);
+  const t = useCallback(
+    (key: string, params?: Record<string, string | number>) =>
+      translate(key, lang, params),
+    [lang],
+  );
+
+  // 호스트 테마/언어 추종.
+  useEffect(() => {
+    const offTheme = app.events.on("theme.changed", (p) => {
+      const mode = (p as { mode?: string })?.mode;
+      if (mode === "dark" || mode === "light") setIsDark(mode === "dark");
+    });
+    const offLocale = app.events.on("locale.changed", (p) => {
+      const l = (p as { language?: string })?.language;
+      if (typeof l === "string") setLang(l);
+    });
+    return () => {
+      offTheme.dispose();
+      offLocale.dispose();
+    };
+  }, [app]);
+
+  const strat = strategyFor(path);
+  const previewable = strat === "markdown" || strat === "svg";
+  const [mode, setMode] = useState<"code" | "preview">("code");
+
+  const [text, setText] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<{ total: number; truncated: boolean } | null>(
+    null,
+  );
+  const savedRef = useRef<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [cmView, setCmView] = useState<EditorView | null>(null);
+  const [findOpen, setFindOpen] = useState(false);
+  const [findReplace, setFindReplace] = useState(false);
+  const [findFocus, setFindFocus] = useState(0);
+
+  // 파일 읽기(텍스트). 바이너리(읽기 실패)는 unsupported 메시지 — 미디어는 files 플러그인 몫.
+  useEffect(() => {
+    let cancelled = false;
+    setText(null);
+    setError(null);
+    setInfo(null);
+    const read = app.fs?.readText;
+    if (!read) {
+      setError("fs:read 권한 없음");
+      return;
+    }
+    read(path)
+      .then((d) => {
+        if (cancelled) return;
+        setText(d.text);
+        savedRef.current = d.text;
+        ctx.setDirty(false);
+        setInfo({ total: d.totalBytes, truncated: d.truncated });
+      })
+      .catch((e) => {
+        if (!cancelled) setError(String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [app, path, ctx]);
+
+  // 20MiB 초과면 구문 강조/폴딩 끈다(대용량 보호).
+  const isLarge = info != null && info.total > 20 * 1024 * 1024;
+
+  const svgUrl = useMemo(
+    () =>
+      strat === "svg" && text != null
+        ? `data:image/svg+xml;utf8,${encodeURIComponent(text)}`
+        : null,
+    [strat, text],
+  );
+
+  const cmExtensions = useMemo(() => {
+    const exts = [search()];
+    if (!isLarge) {
+      const ext = languageExtensionFor(path);
+      if (ext) exts.push(ext);
+    }
+    return exts;
+  }, [path, isLarge]);
+
+  const markdownHtml = useMemo(() => {
+    if (strat !== "markdown" || text == null) return "";
+    const raw = marked.parse(text, { async: false }) as string;
+    return DOMPurify.sanitize(raw);
+  }, [strat, text]);
+
+  const editable = info != null && !info.truncated;
+
+  const onChange = useCallback(
+    (v: string) => {
+      setText(v);
+      ctx.setDirty(v !== savedRef.current);
+    },
+    [ctx],
+  );
+
+  const save = useCallback(async (): Promise<{
+    saved: boolean;
+    reason?: string;
+  }> => {
+    if (!editable) return { saved: false, reason: "read-only" };
+    if (text == null || saving) return { saved: false, reason: "not ready" };
+    if (text === savedRef.current) return { saved: true, reason: "no change" };
+    const write = app.fs?.writeText;
+    if (!write) return { saved: false, reason: "fs:write 권한 없음" };
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await write(path, text);
+      savedRef.current = text;
+      ctx.setDirty(false);
+      return { saved: true };
+    } catch (e) {
+      setSaveError(String(e));
+      return { saved: false, reason: String(e) };
+    } finally {
+      setSaving(false);
+    }
+  }, [editable, text, saving, app, path, ctx]);
+
+  // editor.* 명령 브리지(최신 함수를 ref 로 노출 — registry 등록은 viewId 당 1회).
+  const saveRef = useRef(save);
+  saveRef.current = save;
+  const cmViewRef = useRef<EditorView | null>(null);
+  cmViewRef.current = cmView;
+  const editableRef = useRef(editable);
+  editableRef.current = editable;
+  const textRef = useRef<string | null>(null);
+  textRef.current = text;
+
+  useEffect(() => {
+    setHandle(viewId, {
+      path,
+      save: () => saveRef.current(),
+      getText: () => textRef.current,
+      setText: (next) => {
+        const v = cmViewRef.current;
+        if (!v || !editableRef.current) return false;
+        v.dispatch({
+          changes: { from: 0, to: v.state.doc.length, insert: next },
+        });
+        return true;
+      },
+      openFind: (replace) => {
+        setFindReplace(replace);
+        setFindOpen(true);
+        setFindFocus((n) => n + 1);
+      },
+      format: async () => ({ formatted: false, reason: "no formatter" }),
+      find: (query, opts) => {
+        const v = cmViewRef.current;
+        if (!v) return { matches: 0 };
+        const q = new SearchQuery({
+          search: query,
+          caseSensitive: opts.caseSensitive ?? false,
+          regexp: opts.regexp ?? false,
+          wholeWord: opts.wholeWord ?? false,
+        });
+        v.dispatch({ effects: setSearchQuery.of(q) });
+        let matches = 0;
+        const it = q.getCursor(v.state);
+        while (!it.next().done) matches++;
+        if (matches > 0) findNext(v);
+        return { matches };
+      },
+      replace: (query, replacement, opts) => {
+        const v = cmViewRef.current;
+        if (!v || !editableRef.current) return { replaced: 0 };
+        const q = new SearchQuery({
+          search: query,
+          replace: replacement,
+          caseSensitive: opts.caseSensitive ?? false,
+          regexp: opts.regexp ?? false,
+          wholeWord: opts.wholeWord ?? false,
+        });
+        v.dispatch({ effects: setSearchQuery.of(q) });
+        let matches = 0;
+        const it = q.getCursor(v.state);
+        while (!it.next().done) matches++;
+        if (matches === 0) return { replaced: 0 };
+        if (opts.all) {
+          replaceAll(v);
+          return { replaced: matches };
+        }
+        findNext(v);
+        replaceNext(v);
+        return { replaced: 1 };
+      },
+    });
+    return () => clearHandle(viewId);
+  }, [viewId, path]);
+
+  const onKeyDown = useCallback(
+    (e: ReactKeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.code === "KeyS") {
+        e.preventDefault();
+        void save();
+      } else if (mod && e.code === "KeyF" && !e.altKey) {
+        e.preventDefault();
+        setFindReplace(false);
+        setFindOpen(true);
+        setFindFocus((n) => n + 1);
+      } else if (mod && ((e.code === "KeyF" && e.altKey) || e.code === "KeyH")) {
+        e.preventDefault();
+        setFindReplace(true);
+        setFindOpen(true);
+        setFindFocus((n) => n + 1);
+      }
+    },
+    [save],
+  );
+
+  const dirty = editable && text != null && text !== savedRef.current;
+
+  const codeBody = (): ReactNode => {
+    if (error) {
+      return (
+        <div className="sk-ed-msg">
+          {t("unsupported")}
+          <br />
+          <span className="sk-ed-msg-sub">{error}</span>
+        </div>
+      );
+    }
+    if (text == null) return <div className="sk-ed-msg">{t("loading")}</div>;
+    return (
+      <div
+        className="sk-ed-code"
+        onKeyDownCapture={onKeyDown}
+        onFocusCapture={() => markActive(viewId)}
+      >
+        <EditorFind
+          view={cmView}
+          open={findOpen}
+          replaceMode={findReplace}
+          editable={editable}
+          focusSignal={findFocus}
+          onClose={() => setFindOpen(false)}
+          t={t}
+        />
+        {(info && (isLarge || info.truncated)) || saveError || dirty ? (
+          <div className="sk-ed-banner">
+            {isLarge && t("largeFile", { size: fmtBytes(info!.total) })}
+            {info?.truncated &&
+              `${isLarge ? " · " : ""}${t("truncated", { read: fmtBytes(text.length) })}`}
+            {saveError && (
+              <span className="sk-ed-banner-err">
+                {(isLarge || info?.truncated ? " · " : "") +
+                  t("saveFailed", { err: saveError })}
+              </span>
+            )}
+            {dirty && !saveError && (
+              <span className="sk-ed-banner-dirty">
+                {(isLarge || info?.truncated ? " · " : "") +
+                  (saving ? t("saving") : t("unsaved"))}
+              </span>
+            )}
+          </div>
+        ) : null}
+        <CodeMirror
+          className="sk-ed-cm"
+          value={text}
+          height="100%"
+          theme={isDark ? "dark" : "light"}
+          extensions={cmExtensions}
+          editable={editable}
+          onChange={editable ? onChange : undefined}
+          onCreateEditor={(v) => setCmView(v)}
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: !isLarge,
+            highlightActiveLine: editable,
+            highlightActiveLineGutter: editable,
+            searchKeymap: false,
+          }}
+        />
+      </div>
+    );
+  };
+
+  const body = (): ReactNode => {
+    if (strat === "svg") {
+      if (mode !== "preview") return codeBody();
+      return svgUrl ? (
+        <div className="sk-ed-image-wrap">
+          <img className="sk-ed-image" src={svgUrl} alt="" />
+        </div>
+      ) : (
+        <div className="sk-ed-msg">{t("loading")}</div>
+      );
+    }
+    if (strat === "markdown") {
+      return mode === "preview" ? (
+        <div
+          className="sk-ed-markdown"
+          dangerouslySetInnerHTML={{ __html: markdownHtml }}
+        />
+      ) : (
+        codeBody()
+      );
+    }
+    return codeBody();
+  };
+
+  return (
+    <div className="sk-ed">
+      {previewable && (
+        <div className="sk-ed-toolbar">
+          <div className="sk-ed-modes">
+            <button
+              type="button"
+              className={`sk-ed-mode${mode === "code" ? " active" : ""}`}
+              onClick={() => setMode("code")}
+            >
+              {t("code")}
+            </button>
+            <button
+              type="button"
+              className={`sk-ed-mode${mode === "preview" ? " active" : ""}`}
+              onClick={() => setMode("preview")}
+            >
+              {t("preview")}
+            </button>
+          </div>
+        </div>
+      )}
+      <div className="sk-ed-body">{body()}</div>
+    </div>
+  );
+}
