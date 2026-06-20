@@ -1,6 +1,6 @@
-# soksak-plugin-editor
+# soksak-plugin-editor-codemirror
 
-A file editor for soksak. Renders code, text, Markdown, and SVG files in a
+A CodeMirror-based file editor for soksak. Renders code, text, Markdown, and SVG files in a
 CodeMirror 6 editor with syntax highlighting, find/replace, and save.
 
 It registers as a soksak **file viewer** (`contributes.fileViewers`). The core
