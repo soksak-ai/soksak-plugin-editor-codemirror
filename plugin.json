@@ -64,6 +64,22 @@
           "en": "Format Document"
         }
       }
+    ],
+    "nodes": [
+      {
+        "id": "mode-code",
+        "description": {
+          "ko": "코드 보기 전환",
+          "en": "Switch to code view"
+        }
+      },
+      {
+        "id": "mode-preview",
+        "description": {
+          "ko": "미리보기 전환",
+          "en": "Switch to preview"
+        }
+      }
     ]
   }
 }
