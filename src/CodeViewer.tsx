@@ -448,6 +448,7 @@ export function CodeViewer({
           <div className="sk-ed-modes">
             <button
               type="button"
+              data-node="mode-code"
               className={`sk-ed-mode${mode === "code" ? " active" : ""}`}
               onClick={() => setMode("code")}
             >
@@ -455,6 +456,7 @@ export function CodeViewer({
             </button>
             <button
               type="button"
+              data-node="mode-preview"
               className={`sk-ed-mode${mode === "preview" ? " active" : ""}`}
               onClick={() => setMode("preview")}
             >
