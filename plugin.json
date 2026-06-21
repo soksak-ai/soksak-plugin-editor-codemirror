@@ -23,6 +23,10 @@
       { "name": "find", "title": { "ko": "찾기", "en": "Find" } },
       { "name": "replace", "title": { "ko": "바꾸기", "en": "Replace" } },
       { "name": "format", "title": { "ko": "문서 서식", "en": "Format Document" } }
+    ],
+    "nodes": [
+      { "id": "mode-code", "description": { "ko": "코드 보기 전환", "en": "Switch to code view" } },
+      { "id": "mode-preview", "description": { "ko": "미리보기 전환", "en": "Switch to preview" } }
     ]
   }
 }
