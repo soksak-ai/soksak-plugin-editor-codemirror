@@ -10,7 +10,10 @@ import {
   useRef,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
+import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
+import { oneDarkHighlightStyle } from "@codemirror/theme-one-dark";
 import {
   findNext,
   replaceAll,
@@ -94,6 +97,33 @@ function detectDark(): boolean {
   return true;
 }
 
+// 에디터 프레임(배경·전경·거터·커서·선택)을 호스트 CSS 변수로 칠한다. @uiw theme="none" 이라 경쟁 테마가
+// 없어 이 값이 그대로 적용되고, var(--bg) 등은 호스트가 테마를 바꾸는 *같은 브라우저 페인트*에 따라온다
+// (원자적 — 크롬과 동시 전환). 구문 토큰색만 isDark 기반 HighlightStyle 로 따로 주는데(한 프레임 늦을 수
+// 있으나 작은 글자색이라 비가시), 배경은 여기서 변수로 고정돼 토글이 통째로 늦는 "순차/허접" 이 사라진다.
+// 안정 모듈 상수(재구성 무관) — isDark 에 의존하지 않아 테마 전환 시 reconfigure 를 유발하지 않는다.
+const cssVarTheme = EditorView.theme({
+  "&": { backgroundColor: "var(--bg)", color: "var(--fg)" },
+  ".cm-content": { caretColor: "var(--fg)" },
+  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--fg)" },
+  ".cm-gutters": {
+    backgroundColor: "var(--bg)",
+    color: "var(--fg3)",
+    border: "none",
+  },
+  ".cm-activeLine": { backgroundColor: "var(--card)" },
+  ".cm-activeLineGutter": { backgroundColor: "var(--card)" },
+  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
+    backgroundColor: "var(--accbg)",
+  },
+  ".cm-foldPlaceholder": {
+    backgroundColor: "var(--card)",
+    color: "var(--fg3)",
+    border: "1px solid var(--bd)",
+  },
+  ".cm-panels": { backgroundColor: "var(--card)", color: "var(--fg)" },
+});
+
 export function CodeViewer({
   app,
   ctx,
@@ -110,11 +140,16 @@ export function CodeViewer({
     [lang],
   );
 
-  // 호스트 테마/언어 추종.
+  // 호스트 테마/언어 추종. 배경/프레임은 cssVarTheme(변수)로 칠해 호스트가 색을 바꾸는 같은 페인트에
+  // 원자적으로 따라오므로 isDark 타이밍과 무관하다. isDark 는 *구문 토큰색*(다크=oneDark/라이트=default
+  // HighlightStyle)만 가른다. theme.changed 는 코어가 동기 발행하므로 flushSync 로 토큰 재색을 같은
+  // 스택에서 처리해 한 프레임이라도 덜 늦춘다(토큰색 지연은 작은 글자라 비가시이나 굳이 미루지 않는다).
   useEffect(() => {
     const offTheme = app.events.on("theme.changed", (p) => {
       const mode = (p as { mode?: string })?.mode;
-      if (mode === "dark" || mode === "light") setIsDark(mode === "dark");
+      if (mode === "dark" || mode === "light") {
+        flushSync(() => setIsDark(mode === "dark"));
+      }
     });
     const offLocale = app.events.on("locale.changed", (p) => {
       const l = (p as { language?: string })?.language;
@@ -193,10 +228,15 @@ export function CodeViewer({
       // 확장 플러그인이 등록한 전역 CM 확장(TODO 강조 등) — 큰 파일 보호 기준은 언어와 동일.
       exts.push(...(cmExtensionList() as Extension[]));
     }
+    // 배경/프레임은 변수 테마(원자적), 구문 토큰색은 모드별 HighlightStyle(다크=oneDark, 라이트=default).
+    exts.push(cssVarTheme);
+    exts.push(
+      syntaxHighlighting(isDark ? oneDarkHighlightStyle : defaultHighlightStyle),
+    );
     return exts;
     // extVer: 언어/확장 등록/해제 신호(값 자체는 미사용).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, isLarge, extVer]);
+  }, [path, isLarge, extVer, isDark]);
 
   const markdownHtml = useMemo(() => {
     if (strat !== "markdown" || text == null) return "";
@@ -400,7 +440,7 @@ export function CodeViewer({
           className="sk-ed-cm"
           value={text}
           height="100%"
-          theme={isDark ? "dark" : "light"}
+          theme="none"
           extensions={cmExtensions}
           editable={editable}
           onChange={editable ? onChange : undefined}

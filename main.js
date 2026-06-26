@@ -12759,6 +12759,7 @@ var import_client = __toESM(require_client(), 1);
 
 // src/CodeViewer.tsx
 var import_react4 = __toESM(require_react(), 1);
+var import_react_dom = __toESM(require_react_dom(), 1);
 
 // node_modules/@babel/runtime/helpers/esm/extends.js
 function _extends() {
@@ -77034,6 +77035,27 @@ function detectDark() {
   }
   return true;
 }
+var cssVarTheme = EditorView.theme({
+  "&": { backgroundColor: "var(--bg)", color: "var(--fg)" },
+  ".cm-content": { caretColor: "var(--fg)" },
+  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--fg)" },
+  ".cm-gutters": {
+    backgroundColor: "var(--bg)",
+    color: "var(--fg3)",
+    border: "none"
+  },
+  ".cm-activeLine": { backgroundColor: "var(--card)" },
+  ".cm-activeLineGutter": { backgroundColor: "var(--card)" },
+  "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, ::selection": {
+    backgroundColor: "var(--accbg)"
+  },
+  ".cm-foldPlaceholder": {
+    backgroundColor: "var(--card)",
+    color: "var(--fg3)",
+    border: "1px solid var(--bd)"
+  },
+  ".cm-panels": { backgroundColor: "var(--card)", color: "var(--fg)" }
+});
 function CodeViewer({
   app,
   ctx
@@ -77048,7 +77070,9 @@ function CodeViewer({
   (0, import_react4.useEffect)(() => {
     const offTheme = app.events.on("theme.changed", (p) => {
       const mode2 = p?.mode;
-      if (mode2 === "dark" || mode2 === "light") setIsDark(mode2 === "dark");
+      if (mode2 === "dark" || mode2 === "light") {
+        (0, import_react_dom.flushSync)(() => setIsDark(mode2 === "dark"));
+      }
     });
     const offLocale = app.events.on("locale.changed", (p) => {
       const l3 = p?.language;
@@ -77111,8 +77135,12 @@ function CodeViewer({
       if (ext) exts.push(ext);
       exts.push(...cmExtensionList());
     }
+    exts.push(cssVarTheme);
+    exts.push(
+      syntaxHighlighting(isDark ? oneDarkHighlightStyle : defaultHighlightStyle)
+    );
     return exts;
-  }, [path, isLarge, extVer]);
+  }, [path, isLarge, extVer, isDark]);
   const markdownHtml = (0, import_react4.useMemo)(() => {
     if (strat !== "markdown" || text5 == null) return "";
     const raw3 = g.parse(text5, { async: false });
@@ -77294,7 +77322,7 @@ function CodeViewer({
               className: "sk-ed-cm",
               value: text5,
               height: "100%",
-              theme: isDark ? "dark" : "light",
+              theme: "none",
               extensions: cmExtensions2,
               editable: editable2,
               onChange: editable2 ? onChange : void 0,
