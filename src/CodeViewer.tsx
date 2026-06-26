@@ -10,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { flushSync } from "react-dom";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
 import { oneDarkHighlightStyle } from "@codemirror/theme-one-dark";
@@ -142,13 +141,15 @@ export function CodeViewer({
 
   // 호스트 테마/언어 추종. 배경/프레임은 cssVarTheme(변수)로 칠해 호스트가 색을 바꾸는 같은 페인트에
   // 원자적으로 따라오므로 isDark 타이밍과 무관하다. isDark 는 *구문 토큰색*(다크=oneDark/라이트=default
-  // HighlightStyle)만 가른다. theme.changed 는 코어가 동기 발행하므로 flushSync 로 토큰 재색을 같은
-  // 스택에서 처리해 한 프레임이라도 덜 늦춘다(토큰색 지연은 작은 글자라 비가시이나 굳이 미루지 않는다).
+  // HighlightStyle)만 가른다 — 한 프레임 늦어도 작은 글자색이라 비가시. theme.changed 는 코어가 *동기*
+  // 발행하므로 flushSync 로 감싸면 에디터가 열려만 있어도(비활성 탭 포함) 테마 변경마다 동기 React 커밋이
+  // 강제돼 apply() 핫패스에 ~20ms 가 낀다. 배경이 이미 변수로 원자적이라 동기일 이유가 없어 평범한
+  // setState 로 둔다(토큰 재색은 다음 틱 — 비가시). 측정: 에디터 열린 상태 테마변경 동기 JS 가 내려감.
   useEffect(() => {
     const offTheme = app.events.on("theme.changed", (p) => {
       const mode = (p as { mode?: string })?.mode;
       if (mode === "dark" || mode === "light") {
-        flushSync(() => setIsDark(mode === "dark"));
+        setIsDark(mode === "dark");
       }
     });
     const offLocale = app.events.on("locale.changed", (p) => {
