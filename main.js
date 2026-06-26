@@ -12759,7 +12759,6 @@ var import_client = __toESM(require_client(), 1);
 
 // src/CodeViewer.tsx
 var import_react4 = __toESM(require_react(), 1);
-var import_react_dom = __toESM(require_react_dom(), 1);
 
 // node_modules/@babel/runtime/helpers/esm/extends.js
 function _extends() {
@@ -77071,7 +77070,7 @@ function CodeViewer({
     const offTheme = app.events.on("theme.changed", (p) => {
       const mode2 = p?.mode;
       if (mode2 === "dark" || mode2 === "light") {
-        (0, import_react_dom.flushSync)(() => setIsDark(mode2 === "dark"));
+        setIsDark(mode2 === "dark");
       }
     });
     const offLocale = app.events.on("locale.changed", (p) => {
