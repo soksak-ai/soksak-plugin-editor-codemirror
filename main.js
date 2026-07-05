@@ -77517,6 +77517,7 @@ function registerCommands(ctx) {
       description: "Editor plugin load/version check (E2E).",
       triggers: { ko: "\uC5D0\uB514\uD130 \uD551 \uC801\uC7AC\uD655\uC778 \uBC84\uC804" },
       returns: "{ ok, version, active }",
+      message: (d4) => `\uC5D0\uB514\uD130 v${d4.version} \uC801\uC7AC\uB428.`,
       handler: () => ({ ok: true, version: "0.0.1", active: activeViewId() })
     })
   );
@@ -77528,9 +77529,10 @@ function registerCommands(ctx) {
         view: { type: "string", description: "View id (default: active)" }
       },
       returns: "{ ok, saved, reason? }",
+      message: (d4) => d4.saved ? "\uD30C\uC77C\uC744 \uC800\uC7A5\uD588\uC2B5\uB2C8\uB2E4." : d4.reason ?? "\uBCC0\uACBD \uC0AC\uD56D\uC774 \uC5C6\uC5B4 \uC800\uC7A5\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.",
       handler: async (p) => {
         const h = resolveHandle(p.view);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = await h.save();
         return { ok: true, ...r2 };
       }
@@ -77548,9 +77550,10 @@ function registerCommands(ctx) {
         wholeWord: { type: "boolean" }
       },
       returns: "{ ok, matches }",
+      message: (d4) => `${d4.matches ?? 0}\uAC1C\uB97C \uCC3E\uC558\uC2B5\uB2C8\uB2E4.`,
       handler: (p) => {
         const h = resolveHandle(p.view);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = h.find(String(p.query ?? ""), {
           caseSensitive: !!p.caseSensitive,
           regexp: !!p.regexp,
@@ -77574,9 +77577,10 @@ function registerCommands(ctx) {
         wholeWord: { type: "boolean" }
       },
       returns: "{ ok, replaced }",
+      message: (d4) => `${d4.replaced ?? 0}\uAC1C\uB97C \uBC14\uAFE8\uC2B5\uB2C8\uB2E4.`,
       handler: (p) => {
         const h = resolveHandle(p.view);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = h.replace(
           String(p.query ?? ""),
           String(p.replacement ?? ""),
@@ -77597,9 +77601,10 @@ function registerCommands(ctx) {
       triggers: { ko: "\uC11C\uC2DD \uD3EC\uB9F7 \uBB38\uC11C\uC815\uB9AC" },
       params: { view: { type: "string" } },
       returns: "{ ok, formatted, reason? }",
+      message: (d4) => d4.formatted ? "\uBB38\uC11C\uB97C \uC11C\uC2DD\uD588\uC2B5\uB2C8\uB2E4." : d4.reason ?? "\uC11C\uC2DD\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.",
       handler: async (p) => {
         const h = resolveHandle(p.view);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = await h.format();
         return { ok: true, ...r2 };
       }

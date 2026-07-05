@@ -31,6 +31,8 @@ export interface PluginCommandSpec {
   params?: Record<string, ParamSpec>;
   returns?: string;
   examples?: readonly string[];
+  // 성공 data(handler 반환)로 한 줄 결과 발화를 합성. 코어 message 프로토콜.
+  message?: (data: any) => string;
   handler: (params: Record<string, unknown>) => Promise<object> | object;
 }
 
