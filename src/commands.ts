@@ -13,6 +13,7 @@ export function registerCommands(ctx: PluginContext): void {
       description: "Editor plugin load/version check (E2E).",
       triggers: { ko: "에디터 핑 적재확인 버전" },
       returns: "{ ok, version, active }",
+      message: (d) => `에디터 v${d.version} 적재됨.`,
       handler: () => ({ ok: true, version: "0.1.0", active: activeViewId() }),
     }),
   );
@@ -26,9 +27,10 @@ export function registerCommands(ctx: PluginContext): void {
         view: { type: "string", description: "View id (default: active)" },
       },
       returns: "{ ok, saved, reason? }",
+      message: (d) => (d.saved ? "파일을 저장했습니다." : d.reason ?? "변경 사항이 없어 저장하지 않았습니다."),
       handler: async (p) => {
         const h = resolveHandle(p.view as string | undefined);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = await h.save();
         return { ok: true, ...r };
       },
@@ -48,9 +50,10 @@ export function registerCommands(ctx: PluginContext): void {
         wholeWord: { type: "boolean" },
       },
       returns: "{ ok, matches }",
+      message: (d) => `${d.matches ?? 0}개를 찾았습니다.`,
       handler: (p) => {
         const h = resolveHandle(p.view as string | undefined);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = h.find(String(p.query ?? ""), {
           caseSensitive: !!p.caseSensitive,
           regexp: !!p.regexp,
@@ -76,9 +79,10 @@ export function registerCommands(ctx: PluginContext): void {
         wholeWord: { type: "boolean" },
       },
       returns: "{ ok, replaced }",
+      message: (d) => `${d.replaced ?? 0}개를 바꿨습니다.`,
       handler: (p) => {
         const h = resolveHandle(p.view as string | undefined);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = h.replace(
           String(p.query ?? ""),
           String(p.replacement ?? ""),
@@ -101,9 +105,10 @@ export function registerCommands(ctx: PluginContext): void {
       triggers: { ko: "서식 포맷 문서정리" },
       params: { view: { type: "string" } },
       returns: "{ ok, formatted, reason? }",
+      message: (d) => (d.formatted ? "문서를 서식했습니다." : d.reason ?? "서식하지 않았습니다."),
       handler: async (p) => {
         const h = resolveHandle(p.view as string | undefined);
-        if (!h) return { ok: false, error: "no active editor view" };
+        if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = await h.format();
         return { ok: true, ...r };
       },
