@@ -1,7 +1,7 @@
 // editor.* 명령 — 활성(또는 지정 view) 에디터 뷰어를 대상으로 동작. registry 핸들 경유.
 // 매니페스트 contributes.commands 선언과 1:1(선언 외 등록은 코어가 거부). CLI/MCP/소켓 자동 노출.
 import type { PluginContext } from "./host";
-import { resolveHandle, activeViewId } from "./registry";
+import { resolveHandle, resolveTargetId, activeViewId } from "./registry";
 
 export function registerCommands(ctx: PluginContext): void {
   const app = ctx.app;
@@ -26,13 +26,14 @@ export function registerCommands(ctx: PluginContext): void {
       params: {
         view: { type: "string", description: "View id (default: active)" },
       },
-      returns: "{ ok, saved, reason? }",
+      returns: "{ ok, saved, reason?, viewId? }",
       message: (d) => (d.saved ? "파일을 저장했습니다." : d.reason ?? "변경 사항이 없어 저장하지 않았습니다."),
       handler: async (p) => {
+        const viewId = resolveTargetId(p.view as string | undefined);
         const h = resolveHandle(p.view as string | undefined);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = await h.save();
-        return { ok: true, ...r };
+        return { ok: true, viewId, ...r };
       },
     }),
   );
@@ -49,9 +50,14 @@ export function registerCommands(ctx: PluginContext): void {
         regexp: { type: "boolean" },
         wholeWord: { type: "boolean" },
       },
-      returns: "{ ok, matches }",
+      returns: "{ ok, matches, viewId? }",
       message: (d) => `${d.matches ?? 0}개를 찾았습니다.`,
+      hint: (d) =>
+        d.ok && (d.matches ?? 0) > 0
+          ? [{ cmd: "replace", why: "찾은 텍스트를 바꿀 수 있습니다." }]
+          : [],
       handler: (p) => {
+        const viewId = resolveTargetId(p.view as string | undefined);
         const h = resolveHandle(p.view as string | undefined);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = h.find(String(p.query ?? ""), {
@@ -59,7 +65,7 @@ export function registerCommands(ctx: PluginContext): void {
           regexp: !!p.regexp,
           wholeWord: !!p.wholeWord,
         });
-        return { ok: true, ...r };
+        return { ok: true, viewId, ...r };
       },
     }),
   );
@@ -78,9 +84,14 @@ export function registerCommands(ctx: PluginContext): void {
         regexp: { type: "boolean" },
         wholeWord: { type: "boolean" },
       },
-      returns: "{ ok, replaced }",
+      returns: "{ ok, replaced, viewId? }",
       message: (d) => `${d.replaced ?? 0}개를 바꿨습니다.`,
+      hint: (d) =>
+        d.ok && (d.replaced ?? 0) > 0
+          ? [{ cmd: "save", why: "변경 사항을 저장할 수 있습니다." }]
+          : [],
       handler: (p) => {
+        const viewId = resolveTargetId(p.view as string | undefined);
         const h = resolveHandle(p.view as string | undefined);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = h.replace(
@@ -93,7 +104,7 @@ export function registerCommands(ctx: PluginContext): void {
             wholeWord: !!p.wholeWord,
           },
         );
-        return { ok: true, ...r };
+        return { ok: true, viewId, ...r };
       },
     }),
   );
@@ -104,13 +115,16 @@ export function registerCommands(ctx: PluginContext): void {
         "Format the active (or specified) editor document (requires a registered formatter).",
       triggers: { ko: "서식 포맷 문서정리" },
       params: { view: { type: "string" } },
-      returns: "{ ok, formatted, reason? }",
+      returns: "{ ok, formatted, reason?, viewId? }",
       message: (d) => (d.formatted ? "문서를 서식했습니다." : d.reason ?? "서식하지 않았습니다."),
+      hint: (d) =>
+        d.ok && d.formatted ? [{ cmd: "save", why: "서식한 문서를 저장할 수 있습니다." }] : [],
       handler: async (p) => {
+        const viewId = resolveTargetId(p.view as string | undefined);
         const h = resolveHandle(p.view as string | undefined);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r = await h.format();
-        return { ok: true, ...r };
+        return { ok: true, viewId, ...r };
       },
     }),
   );

@@ -25,6 +25,11 @@ export interface ParamSpec {
   required?: boolean;
 }
 
+export interface CommandHint {
+  cmd: string;
+  why: string;
+}
+
 export interface PluginCommandSpec {
   description: string;
   triggers?: Record<string, string>;
@@ -33,6 +38,8 @@ export interface PluginCommandSpec {
   examples?: readonly string[];
   // 성공 data(handler 반환)로 한 줄 결과 발화를 합성. 코어 message 프로토콜.
   message?: (data: any) => string;
+  /** Up to 3 suggested next commands, worded suggestively ("...할 수 있습니다"). */
+  hint?: (data: any, ctx: PluginContext) => CommandHint[];
   handler: (params: Record<string, unknown>) => Promise<object> | object;
 }
 
