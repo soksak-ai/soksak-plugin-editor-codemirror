@@ -40,8 +40,14 @@ export function markActive(viewId: string): void {
   if (handles.has(viewId)) active = viewId;
 }
 
-export function resolveHandle(viewId?: string): ViewerHandle | undefined {
+// 명령이 실제로 대상 삼을 뷰 id — resolveHandle 과 동일 규칙(단일 진실), 응답 자기기술(viewId)에 재사용.
+export function resolveTargetId(viewId?: string): string | undefined {
   const key = viewId ?? active ?? undefined;
+  return key != null && handles.has(key) ? key : undefined;
+}
+
+export function resolveHandle(viewId?: string): ViewerHandle | undefined {
+  const key = resolveTargetId(viewId);
   return key != null ? handles.get(key) : undefined;
 }
 

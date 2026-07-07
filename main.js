@@ -76912,8 +76912,12 @@ function clearHandle(viewId) {
 function markActive(viewId) {
   if (handles.has(viewId)) active = viewId;
 }
-function resolveHandle(viewId) {
+function resolveTargetId(viewId) {
   const key = viewId ?? active ?? void 0;
+  return key != null && handles.has(key) ? key : void 0;
+}
+function resolveHandle(viewId) {
+  const key = resolveTargetId(viewId);
   return key != null ? handles.get(key) : void 0;
 }
 function activeViewId() {
@@ -77528,13 +77532,14 @@ function registerCommands(ctx) {
       params: {
         view: { type: "string", description: "View id (default: active)" }
       },
-      returns: "{ ok, saved, reason? }",
+      returns: "{ ok, saved, reason?, viewId? }",
       message: (d4) => d4.saved ? "\uD30C\uC77C\uC744 \uC800\uC7A5\uD588\uC2B5\uB2C8\uB2E4." : d4.reason ?? "\uBCC0\uACBD \uC0AC\uD56D\uC774 \uC5C6\uC5B4 \uC800\uC7A5\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.",
       handler: async (p) => {
+        const viewId = resolveTargetId(p.view);
         const h = resolveHandle(p.view);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = await h.save();
-        return { ok: true, ...r2 };
+        return { ok: true, viewId, ...r2 };
       }
     })
   );
@@ -77549,9 +77554,11 @@ function registerCommands(ctx) {
         regexp: { type: "boolean" },
         wholeWord: { type: "boolean" }
       },
-      returns: "{ ok, matches }",
+      returns: "{ ok, matches, viewId? }",
       message: (d4) => `${d4.matches ?? 0}\uAC1C\uB97C \uCC3E\uC558\uC2B5\uB2C8\uB2E4.`,
+      hint: (d4) => d4.ok && (d4.matches ?? 0) > 0 ? [{ cmd: "replace", why: "\uCC3E\uC740 \uD14D\uC2A4\uD2B8\uB97C \uBC14\uAFC0 \uC218 \uC788\uC2B5\uB2C8\uB2E4." }] : [],
       handler: (p) => {
+        const viewId = resolveTargetId(p.view);
         const h = resolveHandle(p.view);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = h.find(String(p.query ?? ""), {
@@ -77559,7 +77566,7 @@ function registerCommands(ctx) {
           regexp: !!p.regexp,
           wholeWord: !!p.wholeWord
         });
-        return { ok: true, ...r2 };
+        return { ok: true, viewId, ...r2 };
       }
     })
   );
@@ -77576,9 +77583,11 @@ function registerCommands(ctx) {
         regexp: { type: "boolean" },
         wholeWord: { type: "boolean" }
       },
-      returns: "{ ok, replaced }",
+      returns: "{ ok, replaced, viewId? }",
       message: (d4) => `${d4.replaced ?? 0}\uAC1C\uB97C \uBC14\uAFE8\uC2B5\uB2C8\uB2E4.`,
+      hint: (d4) => d4.ok && (d4.replaced ?? 0) > 0 ? [{ cmd: "save", why: "\uBCC0\uACBD \uC0AC\uD56D\uC744 \uC800\uC7A5\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4." }] : [],
       handler: (p) => {
+        const viewId = resolveTargetId(p.view);
         const h = resolveHandle(p.view);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = h.replace(
@@ -77591,7 +77600,7 @@ function registerCommands(ctx) {
             wholeWord: !!p.wholeWord
           }
         );
-        return { ok: true, ...r2 };
+        return { ok: true, viewId, ...r2 };
       }
     })
   );
@@ -77600,13 +77609,15 @@ function registerCommands(ctx) {
       description: "Format the active (or specified) editor document (requires a registered formatter).",
       triggers: { ko: "\uC11C\uC2DD \uD3EC\uB9F7 \uBB38\uC11C\uC815\uB9AC" },
       params: { view: { type: "string" } },
-      returns: "{ ok, formatted, reason? }",
+      returns: "{ ok, formatted, reason?, viewId? }",
       message: (d4) => d4.formatted ? "\uBB38\uC11C\uB97C \uC11C\uC2DD\uD588\uC2B5\uB2C8\uB2E4." : d4.reason ?? "\uC11C\uC2DD\uD558\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.",
+      hint: (d4) => d4.ok && d4.formatted ? [{ cmd: "save", why: "\uC11C\uC2DD\uD55C \uBB38\uC11C\uB97C \uC800\uC7A5\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4." }] : [],
       handler: async (p) => {
+        const viewId = resolveTargetId(p.view);
         const h = resolveHandle(p.view);
         if (!h) return { ok: false, code: "NO_TARGET", message: "no active editor view" };
         const r2 = await h.format();
-        return { ok: true, ...r2 };
+        return { ok: true, viewId, ...r2 };
       }
     })
   );
