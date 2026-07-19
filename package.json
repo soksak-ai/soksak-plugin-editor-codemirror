@@ -1,9 +1,9 @@
 {
   "name": "soksak-plugin-editor-codemirror",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
-  "description": "soksak editor plugin (CodeMirror engine) \u2014 file viewer for code/text/markdown/svg",
+  "description": "soksak editor plugin (CodeMirror engine) — file viewer for code/text/markdown/svg",
   "scripts": {
     "build": "node build.mjs",
     "dev": "node build.mjs --watch",

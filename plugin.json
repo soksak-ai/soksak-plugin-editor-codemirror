@@ -2,13 +2,13 @@
   "spec": "soksak-spec-plugin@0.0.1",
   "id": "soksak-plugin-editor-codemirror",
   "name": {
-    "ko": "\uc5d0\ub514\ud130 (CodeMirror)",
+    "ko": "에디터 (CodeMirror)",
     "en": "Editor (CodeMirror)"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": {
-    "ko": "\ucf54\ub4dc\u00b7\ud14d\uc2a4\ud2b8\u00b7\ub9c8\ud06c\ub2e4\uc6b4\u00b7SVG \ud30c\uc77c \uc5d0\ub514\ud130(CodeMirror). \ucc3e\uae30/\ubc14\uafb8\uae30\u00b7\uc800\uc7a5\u00b7\uad6c\ubb38 \uac15\uc870. soksak \ud30c\uc77c \ubdf0\uc5b4\ub85c \ub4f1\ub85d(\uc5d4\uc9c4 \uc911\ub9bd \u2014 \ucf54\uc5b4\ub294 \ub9e4\uce6d\ub9cc).",
-    "en": "Code, text, markdown, and SVG file editor (CodeMirror). Find/replace, save, syntax highlighting. Registers as a soksak file viewer (engine-neutral \u2014 the core only routes)."
+    "ko": "코드·텍스트·마크다운·SVG 파일 에디터(CodeMirror). 찾기/바꾸기·저장·구문 강조. soksak 파일 뷰어로 등록(엔진 중립 — 코어는 매칭만).",
+    "en": "Code, text, markdown, and SVG file editor (CodeMirror). Find/replace, save, syntax highlighting. Registers as a soksak file viewer (engine-neutral — the core only routes)."
   },
   "entry": "main.js",
   "permissions": [
@@ -31,35 +31,35 @@
       {
         "name": "ping",
         "title": {
-          "ko": "\uc801\uc7ac/\ubc84\uc804 \ud655\uc778(E2E)",
+          "ko": "적재/버전 확인(E2E)",
           "en": "Ping (load/version check)"
         }
       },
       {
         "name": "save",
         "title": {
-          "ko": "\ud30c\uc77c \uc800\uc7a5",
+          "ko": "파일 저장",
           "en": "Save File"
         }
       },
       {
         "name": "find",
         "title": {
-          "ko": "\ucc3e\uae30",
+          "ko": "찾기",
           "en": "Find"
         }
       },
       {
         "name": "replace",
         "title": {
-          "ko": "\ubc14\uafb8\uae30",
+          "ko": "바꾸기",
           "en": "Replace"
         }
       },
       {
         "name": "format",
         "title": {
-          "ko": "\ubb38\uc11c \uc11c\uc2dd",
+          "ko": "문서 서식",
           "en": "Format Document"
         }
       }
@@ -68,14 +68,14 @@
       {
         "id": "mode-code",
         "description": {
-          "ko": "\ucf54\ub4dc \ubcf4\uae30 \uc804\ud658",
+          "ko": "코드 보기 전환",
           "en": "Switch to code view"
         }
       },
       {
         "id": "mode-preview",
         "description": {
-          "ko": "\ubbf8\ub9ac\ubcf4\uae30 \uc804\ud658",
+          "ko": "미리보기 전환",
           "en": "Switch to preview"
         }
       }

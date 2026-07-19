@@ -77522,7 +77522,7 @@ function registerCommands(ctx) {
       triggers: { ko: "\uC5D0\uB514\uD130 \uD551 \uC801\uC7AC\uD655\uC778 \uBC84\uC804" },
       returns: "{ ok, version, active }",
       message: (d4) => `\uC5D0\uB514\uD130 v${d4.version} \uC801\uC7AC\uB428.`,
-      handler: () => ({ ok: true, version: "0.0.1", active: activeViewId() })
+      handler: () => ({ ok: true, version: "0.0.2", active: activeViewId() })
     })
   );
   sub(
