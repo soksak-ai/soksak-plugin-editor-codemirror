@@ -11,6 +11,12 @@
     "en": "Code, text, markdown, and SVG file editor (CodeMirror). Find/replace, save, syntax highlighting. Registers as a soksak file viewer (engine-neutral — the core only routes)."
   },
   "entry": "main.js",
+  "consumes": [
+    {
+      "id": "soksak-spec-plugin-sidebar-file-tree",
+      "range": "^0.0.1"
+    }
+  ],
   "permissions": [
     "ui",
     "fs:read",
@@ -24,7 +30,17 @@
         "extensions": [
           "*"
         ],
-        "priority": 0
+        "priority": 0,
+        "sidebar": {
+          "left": [
+            {
+              "contract": "soksak-spec-plugin-sidebar-file-tree",
+              "range": "^0.0.1",
+              "view": "tree",
+              "instance": "shared"
+            }
+          ]
+        }
       }
     ],
     "commands": [
