@@ -77395,7 +77395,8 @@ var GLOBAL_CSS = `
   flex-direction: column;
   background: var(--bg, #1e1e1e);
   color: var(--fg, #ddd);
-  font: 13px var(--app-font, system-ui, sans-serif);
+  /* \uBCF8\uBB38 \uD3F0\uD2B8 = \uCF54\uC5B4 \xA7Zoom \uBC94\uC6A9 \uBCC0\uC218 \uC18C\uBE44 \u2014 \uD3EC\uCEE4\uC2A4 \uC90C(\u2318\xB1)\uC774 \uC790\uB3D9 \uC801\uC6A9. \uD589 \uADF8\uB9AC\uB4DC \uBD88\uAC00\uCE68. */
+  font: var(--view-font-size, 13px) var(--app-font, system-ui, sans-serif);
   overflow: hidden;
 }
 .sk-ed-toolbar {

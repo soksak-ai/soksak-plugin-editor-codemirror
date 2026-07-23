@@ -9,7 +9,8 @@ export const GLOBAL_CSS = `
   flex-direction: column;
   background: var(--bg, #1e1e1e);
   color: var(--fg, #ddd);
-  font: 13px var(--app-font, system-ui, sans-serif);
+  /* 본문 폰트 = 코어 §Zoom 범용 변수 소비 — 포커스 줌(⌘±)이 자동 적용. 행 그리드 불가침. */
+  font: var(--view-font-size, 13px) var(--app-font, system-ui, sans-serif);
   overflow: hidden;
 }
 .sk-ed-toolbar {
