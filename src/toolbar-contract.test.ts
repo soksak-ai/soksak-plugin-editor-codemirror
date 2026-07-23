@@ -9,4 +9,9 @@ describe("toolbar row contract", () => {
     assert.match(bar, /height:\s*var\(--toolbar-h/);
     assert.match(bar, /padding:\s*0 var\(--toolbar-pad-x/);
   });
+
+  it("본문 폰트는 §Zoom 범용 변수(--view-font-size)를 소비한다", () => {
+    const ed = GLOBAL_CSS.match(/\.sk-ed \{[^}]*\}/)?.[0] ?? "";
+    assert.match(ed, /font:\s*var\(--view-font-size, 13px\)/);
+  });
 });
