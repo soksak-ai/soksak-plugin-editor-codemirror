@@ -17,7 +17,9 @@ export const GLOBAL_CSS = `
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 8px;
+  /* 툴바 행 계약(코어 PLUGIN-CONTRACT §Toolbar row) — 치수는 테마 토큰 소유. */
+  height: var(--toolbar-h, 28px);
+  padding: 0 var(--toolbar-pad-x, 8px);
   border-bottom: 1px solid var(--bd, #333);
   background: var(--card, #252526);
 }
